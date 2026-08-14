@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
     //JavaFX 플러그인
     id 'org.openjfx.javafxplugin' version '0.1.0'
 }
@@ -24,6 +25,10 @@ dependencies {
 javafx {
     version = "21"
     modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+application {
+    mainClass = 'com.pixelflux.main'
 }
 
 test {

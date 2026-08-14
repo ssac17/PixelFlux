@@ -10,7 +10,7 @@ public class Main extends Application {//javaFx의 Application 상속
     public void start(Stage primaryStage) throws Exception {
         MainView mainView = new MainView();
         //창 크기
-        Scene scene = new Scene(mainView.createContent(), 600, 500);
+        Scene scene = new Scene(mainView.createContent(), 800, 700);
         primaryStage.setTitle("Pixelflux");
         primaryStage.setScene(scene);
         primaryStage.show();

@@ -32,7 +32,7 @@ public class MainView {
         root.setStyle("-fx-background-color: #f8fafc;");
 
         // 1. 드래그 앤 드롭 영역
-        dropZone = new Label("📥 변환할 파일(이미지/동영상)을 여기에 끌어다 놓으세요");
+        dropZone = new Label("📥 변환할 파일(이미지/동영상)을 여기에 끌어다 놓으세요\n(또는 클릭하여 Finder에서 파일 선택)");
         dropZone.setMaxWidth(Double.MAX_VALUE);
         dropZone.setMinHeight(140);
         dropZone.setAlignment(Pos.CENTER); //중앙으로 정렬
@@ -48,13 +48,13 @@ public class MainView {
         addFileButton.setMinHeight(36);
         addFileButton.setStyle(
                 "-fx-background-color: #ffffff; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6;" +
-                "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #334155; -fx-padding: 6 14;"
+                "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #334155; -fx-padding: 6 14; -fx-cursor: hand;"
         );
         clearListButton = new Button("🗑️ 목록 비우기");
         clearListButton.setMinHeight(36);
         clearListButton.setStyle(
                 "-fx-background-color: #ffffff; -fx-border-color: #cbd5e1; -fx-border-radius: 6;-fx-background-radius: 6;" +
-                "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #ef4444; -fx-padding: 6 14;"
+                "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #ef4444; -fx-padding: 6 14; -fx-cursor: hand;"
         );
         listActionBar.getChildren().addAll(addFileButton, clearListButton);
 

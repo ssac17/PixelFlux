@@ -19,5 +19,16 @@ public record MediaFile(
     public boolean isVideo() {
         return extension != null && VIDEO_EXTENSIONS.contains(extension.toLowerCase());
     }
-    //todo: from 추후 추가 예정
+
+    public static MediaFile from(File file) {
+        String name = file.getName();
+        long size = file.length();
+
+        int dotIndex = name.lastIndexOf('.');
+        String ext = (dotIndex > 0 && dotIndex < name.length() - 1)
+                ? name.substring(dotIndex + 1).toLowerCase()
+                : "";
+
+        return new MediaFile(file, name, size, ext);
+    }
 }

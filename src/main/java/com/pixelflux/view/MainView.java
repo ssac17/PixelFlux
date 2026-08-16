@@ -25,38 +25,6 @@ public class MainView {
     private Button addFileButton;
     private Button clearListButton;
 
-    public Label getDropZone() {
-        return dropZone;
-    }
-
-    public ListView<String> getListView() {
-        return listView;
-    }
-
-    public ComboBox<String> getFormatComboBox() {
-        return formatComboBox;
-    }
-
-    public ComboBox<String> getWidthComboBox() {
-        return widthComboBox;
-    }
-
-    public ComboBox<String> getQualityComboBox() {
-        return qualityComboBox;
-    }
-
-    public Button getConvertButton() {
-        return convertButton;
-    }
-
-    public Button getAddFileButton() {
-        return addFileButton;
-    }
-
-    public Button getClearListButton() {
-        return clearListButton;
-    }
-
     public Parent createContent() {
         VBox root = new VBox(18); //간격 15
         root.setPadding(new Insets(24)); // padding 20px
@@ -133,9 +101,9 @@ public class MainView {
 
         //option box 세팅
         optionBox.getChildren().addAll(
-                new Label("포맷:"), formatComboBox,
-                new Label("해상도:"), widthComboBox,
-                new Label("품질:"), qualityComboBox
+                formatLabel, formatComboBox,
+                widthLabel, widthComboBox,
+                qualtiyLabel, qualityComboBox
         );
 
         //변환 버튼
@@ -150,4 +118,14 @@ public class MainView {
         root.getChildren().addAll(dropZone, listActionBar, listView, optionBox, convertButton);
         return root;
     }
+
+    //getter
+    public Label getDropZone() {return dropZone;}
+    public ListView<String> getListView() {return listView;}
+    public ComboBox<String> getFormatComboBox() {return formatComboBox;}
+    public ComboBox<String> getWidthComboBox() {return widthComboBox;}
+    public ComboBox<String> getQualityComboBox() {return qualityComboBox;}
+    public Button getConvertButton() {return convertButton;}
+    public Button getAddFileButton() {return addFileButton;}
+    public Button getClearListButton() {return clearListButton;}
 }

@@ -7,7 +7,9 @@ import net.coobird.thumbnailator.Thumbnails;
 import java.io.File;
 import java.io.IOException;
 
-public class ImageConverter {
+public class ImageConverter implements MediaConverter {
+
+    @Override
     public File convert(MediaFile mediaFile, ConvertOptions options) throws IOException {
         if(!mediaFile.isImage()) {
             throw new IllegalArgumentException("이미지 파일이 아닙니다: " + mediaFile.name());

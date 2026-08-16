@@ -25,6 +25,38 @@ public class MainView {
     private Button addFileButton;
     private Button clearListButton;
 
+    public Label getDropZone() {
+        return dropZone;
+    }
+
+    public ListView<String> getListView() {
+        return listView;
+    }
+
+    public ComboBox<String> getFormatComboBox() {
+        return formatComboBox;
+    }
+
+    public ComboBox<String> getWidthComboBox() {
+        return widthComboBox;
+    }
+
+    public ComboBox<String> getQualityComboBox() {
+        return qualityComboBox;
+    }
+
+    public Button getConvertButton() {
+        return convertButton;
+    }
+
+    public Button getAddFileButton() {
+        return addFileButton;
+    }
+
+    public Button getClearListButton() {
+        return clearListButton;
+    }
+
     public Parent createContent() {
         VBox root = new VBox(18); //간격 15
         root.setPadding(new Insets(24)); // padding 20px

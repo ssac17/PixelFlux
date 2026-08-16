@@ -1,11 +1,13 @@
 package com.pixelflux.controller;
 
+import com.pixelflux.model.ConvertOptions;
 import com.pixelflux.model.MediaFile;
 import com.pixelflux.service.ImageConverter;
 import com.pixelflux.view.MainView;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,9 +29,11 @@ public class MainController {
         mainView.getAddFileButton().setOnAction(e -> handleAddFiles());
         mainView.getDropZone().setOnMouseClicked(e -> handleAddFiles());
         mainView.getClearListButton().setOnAction(e -> handleClearList());
+        mainView.getConvertButton().setOnAction(e -> handleConvert());
     }
 
     public void handleAddFiles() {
+        System.out.println(">>> 파일 추가 버튼 클릭됨!");
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("변환할 이미지/동영상 선택");
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(
@@ -53,4 +57,25 @@ public class MainController {
         mediaFiles.clear();
         mainView.getListView().getItems().clear();
     }
-}
+
+    public void handleConvert() {
+        if(mediaFiles.isEmpty()) {
+            System.out.println("변환할 파일이 없습니다.");
+            return;
+        }
+
+        String format = mainView.getFormatComboBox().getValue();
+        String width = mainView.getWidthComboBox().getValue();
+        String quality = mainView.getQualityComboBox().getValue();
+        ConvertOptions options = ConvertOptions.of(format, width, quality, null);
+
+        for (MediaFile mediaFile : mediaFiles) {
+            try {
+                File convertedImage = imageConverter.convert(mediaFile, options);
+                System.out.println("이미지 변환 성공, " + convertedImage.getName());
+            } catch (IOException e) {
+                System.err.println("변환 실패 (" + mediaFile.name() + "): " + e.getMessage());
+            }
+        }
+    }
+ }

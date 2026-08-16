@@ -3,6 +3,7 @@ plugins {
     id 'application'
     //JavaFX 플러그인
     id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'com.gradleup.shadow' version '8.3.6'
 }
 
 group = 'com'
@@ -28,7 +29,13 @@ javafx {
 }
 
 application {
-    mainClass = 'com.pixelflux.main'
+    mainClass = 'com.pixelflux.Launcher'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.pixelflux.Launcher'
+    }
 }
 
 test {

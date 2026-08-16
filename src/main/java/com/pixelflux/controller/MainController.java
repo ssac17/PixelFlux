@@ -46,9 +46,7 @@ public class MainController {
                 MediaFile media = MediaFile.from(file);
                 mediaFiles.add(media);
                 // 화면 ListView에도 추가 (파일명 + 용량 표시)
-                mainView.getListView().getItems().add(
-                        media.name() + " (" + (media.size() / 1024) + " KB)"
-                );
+                mainView.getListView().getItems().add(media.name() + " (" + (media.formattedSize() + ")"));
             }
         }
     }

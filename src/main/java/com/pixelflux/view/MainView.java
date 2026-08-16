@@ -13,8 +13,9 @@ import javafx.scene.layout.VBox;
 
 //레이아웃 구성
 public class MainView {
-    //파일 끌어 놓기 영역
-    private Label dropZone;
+
+    private Label dropZone; //파일 끌어 놓기 영역
+    private Label statusLabel;
     //파일 목록 표시할 영역
     private ListView<String> listView;
 
@@ -56,7 +57,12 @@ public class MainView {
                 "-fx-background-color: #ffffff; -fx-border-color: #cbd5e1; -fx-border-radius: 6;-fx-background-radius: 6;" +
                 "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #ef4444; -fx-padding: 6 14; -fx-cursor: hand;"
         );
-        listActionBar.getChildren().addAll(addFileButton, clearListButton);
+
+        //메시지 창
+        statusLabel = new Label("");
+        statusLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #475569; -fx-font-weight: bold;");
+
+        listActionBar.getChildren().addAll(addFileButton, clearListButton, statusLabel);
 
         // 2. 파일 목록 표시 영역
         listView = new ListView<>();
@@ -64,6 +70,7 @@ public class MainView {
                 "-fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; " +
                 "-fx-font-size: 14px; -fx-cell-size: 36px;"
         );
+
         //가로 패널
         VBox.setVgrow(listView, Priority.ALWAYS);
         //세로 패널
@@ -121,6 +128,7 @@ public class MainView {
 
     //getter
     public Label getDropZone() {return dropZone;}
+    public Label getStatusLabel() {return statusLabel;}
     public ListView<String> getListView() {return listView;}
     public ComboBox<String> getFormatComboBox() {return formatComboBox;}
     public ComboBox<String> getWidthComboBox() {return widthComboBox;}

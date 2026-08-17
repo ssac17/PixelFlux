@@ -20,7 +20,11 @@ dependencies {
     //이미지
     implementation("net.coobird:thumbnailator:0.4.21")
     //영상
-    implementation("org.bytedeco:javacv:1.5.13")
+    implementation 'org.bytedeco:javacv:1.5.13'
+    implementation 'org.bytedeco:javacpp:1.5.13'
+    implementation 'org.bytedeco:javacpp:1.5.13:macosx-arm64'
+    implementation 'org.bytedeco:ffmpeg:8.0.1-1.5.13'
+    implementation 'org.bytedeco:ffmpeg:8.0.1-1.5.13:macosx-arm64'
 }
 
 javafx {
@@ -30,6 +34,11 @@ javafx {
 
 application {
     mainClass = 'com.pixelflux.Launcher'
+    applicationDefaultJvmArgs = ['-Dfile.encoding=UTF-8']
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 jar {

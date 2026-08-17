@@ -18,6 +18,7 @@ public class VideoConverter implements  MediaConverter {
         if(!mediaFile.isVideo()) {
             throw new IllegalArgumentException("비디오 파일이 아닙니다: " + mediaFile.name());
         }
+        System.out.println(mediaFile.name() + " " + mediaFile.extension());
         File targetDir = (options.outputDirectory() != null) ? options.outputDirectory() : mediaFile.file().getParentFile();
 
         if(targetDir != null && !targetDir.exists()) {
@@ -26,15 +27,18 @@ public class VideoConverter implements  MediaConverter {
         File outputFile = Utils.generateOutputFile(mediaFile, options);
 
         //원본 동영상
-        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(mediaFile.file())) {
+
+        try(FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(mediaFile.file()))  {
             grabber.start();
+
             int width = grabber.getImageWidth();
             int height = grabber.getImageHeight();
+            int audioChannels = Math.max(0, grabber.getAudioChannels());
 
             //가로,세로 비율 유지
             int targetWidth = width;
             int targetHeight = height;
-            if(options.targetWidth() != null && options.targetWidth() < height) {
+            if (options.targetWidth() != null && options.targetWidth() < width) {
                 targetWidth = options.targetWidth();
                 targetHeight = (int) Math.round((double) (height * targetWidth) / width);
             }
@@ -43,12 +47,16 @@ public class VideoConverter implements  MediaConverter {
 
             //인코더 설정
             try(FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(
-                    outputFile, targetWidth, targetHeight, grabber.getAudioChannels())) {
+                    outputFile, targetWidth, targetHeight, audioChannels)) {
                 recorder.setFormat("mp4");
+
                 recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-                recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
                 recorder.setFrameRate(grabber.getFrameRate() > 0 ? grabber.getFrameRate() : 30.0);
-                recorder.setSampleRate(grabber.getSampleRate());
+                // 오디오 트랙이 존재하는 경우에만 오디오 코덱 세팅
+                if (audioChannels > 0) {
+                    recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+                    recorder.setSampleRate(grabber.getSampleRate() > 0 ? grabber.getSampleRate() : 44100);
+                }
 
                 // CRF 화질 매핑 (0.6 ~ 1.0 -> 28 ~ 18)
                 double quality = (options.quality() > 0) ? options.quality() : 0.8;
@@ -69,6 +77,7 @@ public class VideoConverter implements  MediaConverter {
             grabber.stop();
         }catch (Exception e) {
             System.out.println("동영상 병환 중 에러 발생!, " + mediaFile.file());
+            e.printStackTrace();
         }
         return outputFile;
     }

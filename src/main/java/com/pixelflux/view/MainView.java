@@ -1,12 +1,10 @@
 package com.pixelflux.view;
 
+import com.pixelflux.model.MediaFile;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -60,16 +58,31 @@ public class MainView {
 
         //메시지 창
         statusLabel = new Label("");
-        statusLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #475569; -fx-font-weight: bold;");
+        statusLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #475569; -fx-font-weight: bold;" +
+                " -fx-font-family: 'Apple SD Gothic Neo', sans-serif;");
 
         listActionBar.getChildren().addAll(addFileButton, clearListButton, statusLabel);
 
         // 2. 파일 목록 표시 영역
         listView = new ListView<>();
-        listView.setStyle(
-                "-fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; " +
-                "-fx-font-size: 14px; -fx-cell-size: 36px;"
-        );
+        listView.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle(""); // 빈 셀 초기화
+                } else {
+                    setText(item);
+
+                    // 💡 셀 자체에 직접 스타일 주입
+                    setStyle(
+                            "-fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 14px; " +
+                            "-fx-font-family: 'Apple SD Gothic Neo', sans-serif;"
+                    );
+                }
+            }
+        });
 
         //가로 패널
         VBox.setVgrow(listView, Priority.ALWAYS);

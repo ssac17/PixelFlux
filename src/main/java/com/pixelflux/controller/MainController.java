@@ -3,6 +3,8 @@ package com.pixelflux.controller;
 import com.pixelflux.model.ConvertOptions;
 import com.pixelflux.model.MediaFile;
 import com.pixelflux.service.ImageConverter;
+import com.pixelflux.service.MediaConverter;
+import com.pixelflux.service.VideoConverter;
 import com.pixelflux.view.MainView;
 import javafx.stage.FileChooser;
 
@@ -13,12 +15,12 @@ import java.util.List;
 
 public class MainController {
 
-    private final ImageConverter imageConverter;
+    private final List<MediaConverter> converters;
     private final MainView mainView;
     private final List<MediaFile> mediaFiles;
 
-    public MainController(ImageConverter imageConverter, MainView mainView) {
-        this.imageConverter = imageConverter;
+    public MainController(List<MediaConverter> converters, MainView mainView) {
+        this.converters = converters;
         this.mainView = mainView;
         this.mediaFiles = new ArrayList<>();
         initEventHandlers();
@@ -85,8 +87,15 @@ public class MainController {
         int failCount = 0;
 
         for (MediaFile mediaFile : mediaFiles) {
+            MediaConverter converter = findConverter(mediaFile);
+            if(converter == null) {
+                failCount++;
+                System.out.println("지원하는 변환기가 아닙니다: " + mediaFile.name());
+                continue;
+            }
+
             try {
-                imageConverter.convert(mediaFile, options);
+                converter.convert(mediaFile, options);
                 successCount++;
             } catch (IOException e) {
                 failCount++;
@@ -96,4 +105,13 @@ public class MainController {
                 String.format("완료 (성공: %d건, 실패: %d건)", successCount, failCount)
         );
     }
- }
+
+    private MediaConverter findConverter(MediaFile mediaFile) {
+        return converters.stream()
+                .filter(converter ->
+                        (mediaFile.isImage() && converter instanceof ImageConverter) ||
+                        (mediaFile.isVideo() && converter instanceof VideoConverter))
+                .findFirst()
+                .orElse(null);
+    }
+}

@@ -20,7 +20,7 @@ dependencies {
     //이미지
     implementation("net.coobird:thumbnailator:0.4.21")
     //영상
-    implementation("org.bytedeco:ffmpeg:8.1.2-1.5.14")
+    implementation("org.bytedeco:javacv:1.5.13")
 }
 
 javafx {

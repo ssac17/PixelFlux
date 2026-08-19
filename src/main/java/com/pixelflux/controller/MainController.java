@@ -8,6 +8,7 @@ import com.pixelflux.service.VideoConverter;
 import com.pixelflux.view.MainView;
 import javafx.stage.FileChooser;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class MainController {
 
         int successCount = 0;
         int failCount = 0;
-
+        File outputFile = null;
         for (MediaFile mediaFile : mediaFiles) {
             MediaConverter converter = findConverter(mediaFile);
             if(converter == null) {
@@ -95,7 +96,7 @@ public class MainController {
             }
 
             try {
-                converter.convert(mediaFile, options);
+                outputFile = converter.convert(mediaFile, options);
                 successCount++;
             } catch (IOException e) {
                 failCount++;
@@ -104,6 +105,9 @@ public class MainController {
         mainView.getStatusLabel().setText(
                 String.format("완료 (성공: %d건, 실패: %d건)", successCount, failCount)
         );
+        if(successCount > 0) {
+            openDirectory(outputFile.getParentFile());
+        }
     }
 
     private MediaConverter findConverter(MediaFile mediaFile) {
@@ -113,5 +117,21 @@ public class MainController {
                         (mediaFile.isVideo() && converter instanceof VideoConverter))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private static void openDirectory(File directory) {
+        if(directory == null || !directory.exists() || !directory.isDirectory()) {
+            return;
+        }
+        if(Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            if(desktop.isSupported(Desktop.Action.OPEN)) {
+                try {
+                    desktop.open(directory);
+                } catch (IOException e) {
+                    System.out.println("폴더 열기 실패: " + e.getMessage());
+                }
+            }
+        }
     }
 }

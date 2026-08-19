@@ -64,6 +64,7 @@ public class MainView {
         listActionBar.getChildren().addAll(addFileButton, clearListButton, statusLabel);
 
         // 2. 파일 목록 표시 영역
+
         listView = new ListView<>();
         listView.setCellFactory(lv -> new ListCell<String>() {
             @Override

@@ -10,6 +10,8 @@ import com.pixelflux.view.MainView;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
 
 import java.awt.*;
@@ -42,6 +44,7 @@ public class MainController {
         mainView.getClearListButton().setOnAction(e -> handleClearList());
         mainView.getConvertButton().setOnAction(e -> handleConvert());
         mainView.getExitButton().setOnAction(e -> handleExit());
+        DragAndDropAddFiles();
     }
 
     private void handleAddFiles() {
@@ -56,27 +59,34 @@ public class MainController {
             return;
         }
 
-        String statusMsg = "";
-        for (File file : selectedFiles) {
-            MediaFile media = MediaFile.from(file);
-            if(!mediaFiles.contains(media)) {
-                mediaFiles.add(media);
-                // 화면 ListView에도 추가 (파일명 + 용량 표시)
-                mainView.getListView().getItems().add(media.name() + " (" + (media.formattedSize() + ")"));
-            }
-        }
-
-        int mainViewSize = mainView.getListView().getItems().size();
-        String firstFileName = mainView.getListView().getItems().getFirst();
-        int index = firstFileName.indexOf("(");
-        firstFileName = firstFileName.substring(0, index);
-        if(mainViewSize == 1) {
-            statusMsg = firstFileName;
-        } else {
-            statusMsg = firstFileName + "    포함: " + mainViewSize;
-        }
+        String statusMsg = addFiles(selectedFiles);
         mainView.getStatusLabel().setText(statusMsg);
     }
+
+    private void DragAndDropAddFiles() {
+        Label dropZone = mainView.getDropZone();
+        //파일 올리면 마우스 +버튼 변경
+        dropZone.setOnDragOver(event -> {
+            if(event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+            event.consume();
+        });
+
+        dropZone.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean result = false;
+            if(db.hasFiles()) {
+                List<File> droppedFiles = db.getFiles();
+                String StatusMsg = addFiles(droppedFiles);
+                mainView.getStatusLabel().setText(StatusMsg);
+                result = true;
+            }
+            event.setDropCompleted(result);
+            event.consume();
+        });
+    }
+
 
     private void handleClearList() {
         mainView.getStatusLabel().setText("");
@@ -167,6 +177,45 @@ public class MainController {
     private void handleExit() {
         Platform.exit();
         System.exit(0);
+    }
+
+    private String addFiles(List<File> addFiles) {
+        if (addFiles == null || addFiles.isEmpty()) {
+            return mainView.getStatusLabel().getText();
+        }
+        int addedCount = 0;
+        int skippedCount = 0;
+        for (File file : addFiles) {
+            MediaFile media = MediaFile.from(file);
+            System.out.println(media);
+            if(!media.isImage() && !media.isVideo()) {
+                skippedCount++;
+                continue;
+            }
+            if(!mediaFiles.contains(media)) {
+                mediaFiles.add(media);
+                addedCount++;
+                // 화면 ListView에도 추가 (파일명 + 용량 표시)
+                mainView.getListView().getItems().add(media.name() + " (" + (media.formattedSize() + ")"));
+            }
+        }
+
+        int mainViewSize = mainView.getListView().getItems().size();
+        // 💡 리스트가 아예 비어있는 경우 (전부 미지원 파일 등)
+        if (mainViewSize == 0) {
+            return skippedCount > 0 ? "지원하지 않는 파일입니다. (미지원 " + skippedCount + "건)" : "";
+        }
+
+        String firstItem = mainView.getListView().getItems().getFirst();
+        int index = firstItem.indexOf("(");
+        String firstFileName = (index != -1) ? firstItem.substring(0, index).trim() : firstItem;
+
+        String statusMsg = (mainViewSize == 1) ? firstFileName : firstFileName + "    포함: " + mainViewSize;
+
+        if (skippedCount > 0) {
+            statusMsg += ", 미지원 파일: " + skippedCount + " 건";
+        }
+        return statusMsg;
     }
 
     private MediaConverter findConverter(MediaFile mediaFile) {

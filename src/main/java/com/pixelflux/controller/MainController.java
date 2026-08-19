@@ -36,6 +36,7 @@ public class MainController {
         mainView.getDropZone().setOnMouseClicked(e -> handleAddFiles());
         mainView.getClearListButton().setOnAction(e -> handleClearList());
         mainView.getConvertButton().setOnAction(e -> handleConvert());
+        mainView.getExitButton().setOnAction(e -> handleExit());
     }
 
     public void handleAddFiles() {
@@ -161,5 +162,10 @@ public class MainController {
                 }
             }
         }
+    }
+
+    private void handleExit() {
+        Platform.exit();
+        System.exit(0);
     }
 }

@@ -1,6 +1,5 @@
 package com.pixelflux.view;
 
-import com.pixelflux.model.MediaFile;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -22,6 +21,7 @@ public class MainView {
     private ComboBox<String> widthComboBox;
     private  ComboBox<String> qualityComboBox;
     private Button convertButton;
+    private Button exitButton;
     private Button addFileButton;
     private Button clearListButton;
 
@@ -30,8 +30,8 @@ public class MainView {
     private StackPane progressContainer;
 
     public Parent createContent() {
-        VBox root = new VBox(18); //간격 15
-        root.setPadding(new Insets(24)); // padding 20px
+        VBox root = new VBox(18); //간격
+        root.setPadding(new Insets(24)); //padding
         //배경
         root.setStyle("-fx-background-color: #f8fafc;");
 
@@ -132,37 +132,48 @@ public class MainView {
                 qualtiyLabel, qualityComboBox
         );
 
+        //하단 버튼 부분(변환, 종료 버튼)
+        HBox bottomActionBar = new HBox(12);
+        bottomActionBar.setAlignment(Pos.CENTER);
+
         //변환 버튼
         convertButton = new Button("변환 시작");
         convertButton.setMaxWidth(Double.MAX_VALUE);
-        convertButton.setMaxHeight(42);
+        convertButton.setMaxHeight(44);
         convertButton.setStyle(
                 "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; " +
                 "-fx-background-radius: 8; -fx-cursor: hand;"
         );
+        HBox.setHgrow(convertButton, Priority.ALWAYS);
+
+        //종료 버튼
+        exitButton = new Button("종료");
+        exitButton.setMinWidth(90);
+        exitButton.setMinHeight(44);
+        exitButton.setStyle(
+                "-fx-background-color: #e2e8f0; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-background-radius: 8;" +
+                "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #475569; -fx-cursor: hand;"
+        );
+        bottomActionBar.getChildren().addAll(convertButton, exitButton);
+
 
         //진행률, 프로그레스바
         progressBar = new ProgressBar(0);
         progressBar.setMaxWidth(Double.MAX_VALUE);
         progressBar.setMinHeight(20);
         progressBar.setStyle(
-                "-fx-accent: #38bdf8; " +
-                "-fx-control-inner-background: #e0f2fe; " +
-                "-fx-background-radius: 12; " +
-                "-fx-padding: 0;"
+                "-fx-accent: #38bdf8; -fx-control-inner-background: #e0f2fe;-fx-background-radius: 12; -fx-padding: 0;"
         );
         progressLabel = new Label("0%");
         progressLabel.setStyle(
-                "-fx-font-size: 13px; " +
-                "-fx-font-weight: 800; " +
-                "-fx-text-fill: #0c4a6e; " +
+                "-fx-font-size: 13px; -fx-font-weight: 800; -fx-text-fill: #0c4a6e;" +
                 "-fx-font-family: 'Apple SD Gothic Neo', sans-serif;"
         );
         progressContainer = new StackPane(progressBar, progressLabel);
         progressContainer.setMaxWidth(Double.MAX_VALUE);
         progressContainer.setVisible(false);
 
-        root.getChildren().addAll(dropZone, listActionBar, listView, optionBox, progressContainer, convertButton);
+        root.getChildren().addAll(dropZone, listActionBar, listView, optionBox, progressContainer, bottomActionBar);
         return root;
     }
 
@@ -174,6 +185,7 @@ public class MainView {
     public ComboBox<String> getWidthComboBox() {return widthComboBox;}
     public ComboBox<String> getQualityComboBox() {return qualityComboBox;}
     public Button getConvertButton() {return convertButton;}
+    public Button getExitButton() {return exitButton;}
     public Button getAddFileButton() {return addFileButton;}
     public Button getClearListButton() {return clearListButton;}
     public ProgressBar getProgressBar() {return progressBar;}

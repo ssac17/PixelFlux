@@ -2,6 +2,7 @@ package com.pixelflux.service;
 
 import com.pixelflux.model.ConvertOptions;
 import com.pixelflux.model.MediaFile;
+import com.pixelflux.util.Utils;
 import net.coobird.thumbnailator.Thumbnails;
 
 import java.io.File;
@@ -21,13 +22,7 @@ public class ImageConverter implements MediaConverter {
             targetDir.mkdir();
         }
 
-        String imageName = mediaFile.name();
-        int dotIndex = imageName.lastIndexOf(".");
-        imageName = imageName.substring(0, dotIndex);
-        String newExtension = options.targetFormat().toLowerCase();
-        String newFileName = imageName + "_converted." + newExtension;
-
-        File outputFile = new File(targetDir, newFileName);
+        File outputFile = Utils.generateOutputFile(mediaFile, options);
         Thumbnails.Builder<File> builder = Thumbnails.of(mediaFile.file());
 
         if(options.targetWidth() != null && options.targetWidth() > 0) {
@@ -35,7 +30,8 @@ public class ImageConverter implements MediaConverter {
         }else {
             builder.scale(1.0);
         }
-        builder.outputFormat(newExtension)
+
+        builder.outputFormat(options.targetFormat())
             .outputQuality(options.quality())
             .toFile(outputFile);
 

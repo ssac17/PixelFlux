@@ -98,7 +98,7 @@ public class MainController {
         mainView.getConvertButton().setDisable(true);
         int fileCount = mediaFiles.size();
 
-        //프로그레스바 구현을 위한 스레드 처리
+        //todo: 프로그레스바 구현을 위한 스레드 처리, 병렬처리 구현하면 추후 수정
         new Thread(() -> {
             int successCount = 0;
             int failCount = 0;

@@ -27,7 +27,6 @@ public class VideoConverter implements  MediaConverter {
         File outputFile = Utils.generateOutputFile(mediaFile, options);
 
         //원본 동영상
-
         try(FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(mediaFile.file()))  {
             grabber.start();
 

@@ -36,7 +36,7 @@ public class MainView {
         root.setStyle("-fx-background-color: #f8fafc;");
 
         // 1. 드래그 앤 드롭 영역
-        dropZone = new Label("📥 변환할 파일(이미지/동영상)을 여기에 끌어다 놓으세요\n(또는 클릭하여 Finder에서 파일 선택)");
+        dropZone = new Label("📥 (그래드 앤 드롭 기능 추가 예정)\n변환할 파일(이미지/동영상)을 여기에 끌어다 놓으세요\n(또는 클릭하여 Finder에서 파일 선택)");
         dropZone.setMaxWidth(Double.MAX_VALUE);
         dropZone.setMinHeight(140);
         dropZone.setAlignment(Pos.CENTER); //중앙으로 정렬

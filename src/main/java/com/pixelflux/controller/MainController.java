@@ -5,6 +5,7 @@ import com.pixelflux.model.MediaFile;
 import com.pixelflux.service.ImageConverter;
 import com.pixelflux.service.MediaConverter;
 import com.pixelflux.service.VideoConverter;
+import com.pixelflux.util.Utils;
 import com.pixelflux.view.MainView;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
@@ -39,7 +40,7 @@ public class MainController {
         mainView.getExitButton().setOnAction(e -> handleExit());
     }
 
-    public void handleAddFiles() {
+    private void handleAddFiles() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("변환할 이미지/동영상 선택");
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(
@@ -54,9 +55,11 @@ public class MainController {
         String statusMsg = "";
         for (File file : selectedFiles) {
             MediaFile media = MediaFile.from(file);
-            mediaFiles.add(media);
-            // 화면 ListView에도 추가 (파일명 + 용량 표시)
-            mainView.getListView().getItems().add(media.name() + " (" + (media.formattedSize() + ")"));
+            if(!mediaFiles.contains(media)) {
+                mediaFiles.add(media);
+                // 화면 ListView에도 추가 (파일명 + 용량 표시)
+                mainView.getListView().getItems().add(media.name() + " (" + (media.formattedSize() + ")"));
+            }
         }
 
         int mainViewSize = mainView.getListView().getItems().size();
@@ -71,13 +74,13 @@ public class MainController {
         mainView.getStatusLabel().setText(statusMsg);
     }
 
-    public void handleClearList() {
+    private void handleClearList() {
         mainView.getStatusLabel().setText("");
         mediaFiles.clear();
         mainView.getListView().getItems().clear();
     }
 
-    public void handleConvert() {
+    private void handleConvert() {
         if(mediaFiles.isEmpty()) {
             mainView.getStatusLabel().setText("변환할 파일이 없습니다.");
             return;
@@ -102,7 +105,7 @@ public class MainController {
         new Thread(() -> {
             int successCount = 0;
             int failCount = 0;
-            File outputFile = null;
+
             for (int i = 0; i < fileCount; i++) {
                 MediaFile mediaFile = mediaFiles.get(i);
                 MediaConverter converter = findConverter(mediaFile);
@@ -112,7 +115,7 @@ public class MainController {
                     continue;
                 }
                 try {
-                    outputFile = converter.convert(mediaFile, options);
+                    converter.convert(mediaFile, options);
                     successCount++;
                 } catch (IOException e) {
                     failCount++;
@@ -133,10 +136,15 @@ public class MainController {
                         String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
                 );
                 if(finalSuccess > 0) {
-                    openDirectory(mediaFiles.getFirst().file().getParentFile());
+                    Utils.openDirectory(mediaFiles.getFirst().file().getParentFile());
                 }
             });
         }).start();
+    }
+
+    private void handleExit() {
+        Platform.exit();
+        System.exit(0);
     }
 
     private MediaConverter findConverter(MediaFile mediaFile) {
@@ -146,26 +154,5 @@ public class MainController {
                         (mediaFile.isVideo() && converter instanceof VideoConverter))
                 .findFirst()
                 .orElse(null);
-    }
-
-    private static void openDirectory(File directory) {
-        if(directory == null || !directory.exists() || !directory.isDirectory()) {
-            return;
-        }
-        if(Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            if(desktop.isSupported(Desktop.Action.OPEN)) {
-                try {
-                    desktop.open(directory);
-                } catch (IOException e) {
-                    System.out.println("폴더 열기 실패: " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    private void handleExit() {
-        Platform.exit();
-        System.exit(0);
     }
 }

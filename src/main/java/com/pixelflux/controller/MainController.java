@@ -17,6 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainController {
 
@@ -101,41 +105,59 @@ public class MainController {
         mainView.getConvertButton().setDisable(true);
         int fileCount = mediaFiles.size();
 
-        //todo: 프로그레스바 구현을 위한 스레드 처리, 병렬처리 구현하면 추후 수정
+        //변환 병렬 처리
         new Thread(() -> {
-            int successCount = 0;
-            int failCount = 0;
+            //스레드 수 지정
+            int threadCount = Math.min(fileCount, Runtime.getRuntime().availableProcessors());
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
-            for (int i = 0; i < fileCount; i++) {
-                MediaFile mediaFile = mediaFiles.get(i);
-                MediaConverter converter = findConverter(mediaFile);
-                if(converter == null) {
-                    System.out.println("지원하는 변환기가 아닙니다: " + mediaFile.name());
-                    failCount++;
-                    continue;
-                }
-                try {
-                    converter.convert(mediaFile, options);
-                    successCount++;
-                } catch (IOException e) {
-                    failCount++;
-                }
-                double progress = (double) (i + 1) / fileCount;
-                int percent = (int) Math.round(progress * 100);
-                Platform.runLater(() -> {
-                    progressBar.setProgress(progress);
-                    progressLabel.setText(percent + "%");
+            AtomicInteger successCount = new AtomicInteger(0);
+            AtomicInteger failCount = new AtomicInteger(0);
+            AtomicInteger completedCount = new AtomicInteger(0); // 💡 프로그레스 바 계산용
+
+            for (MediaFile mediaFile : mediaFiles) {
+                executor.submit(() -> {
+                    MediaConverter converter = findConverter(mediaFile);
+                    if (converter == null) {
+                        failCount.incrementAndGet();
+                    } else {
+                        try {
+                            converter.convert(mediaFile, options);
+                            successCount.incrementAndGet();
+                        } catch (IOException e) {
+                            failCount.incrementAndGet();
+                        }
+                    }
+
+                    //완료된 총 개수로 진행률 계산
+                    int currentCompleted = completedCount.incrementAndGet();
+                    double progress = (double) currentCompleted / fileCount;
+                    int percent = (int) Math.round(progress * 100);
+
+                    Platform.runLater(() -> {
+                        progressBar.setProgress(progress);
+                        progressLabel.setText(percent + "%");
+                    });
                 });
             }
 
-            int finalSuccess = successCount;
-            int finalFail = failCount;
+            //모든 스레드가 끝날 때까지 대기
+            executor.shutdown();
+            try {
+                executor.awaitTermination(1, TimeUnit.HOURS);
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+
+            int finalSuccess = successCount.get();
+            int finalFail = failCount.get();
             Platform.runLater(() -> {
                 mainView.getConvertButton().setDisable(false);
                 mainView.getStatusLabel().setText(
                         String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
                 );
-                if(finalSuccess > 0) {
+                if (finalSuccess > 0) {
                     Utils.openDirectory(mediaFiles.getFirst().file().getParentFile());
                 }
             });

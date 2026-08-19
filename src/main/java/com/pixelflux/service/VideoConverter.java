@@ -18,7 +18,6 @@ public class VideoConverter implements  MediaConverter {
         if(!mediaFile.isVideo()) {
             throw new IllegalArgumentException("비디오 파일이 아닙니다: " + mediaFile.name());
         }
-        System.out.println(mediaFile.name() + " " + mediaFile.extension());
         File targetDir = (options.outputDirectory() != null) ? options.outputDirectory() : mediaFile.file().getParentFile();
 
         if(targetDir != null && !targetDir.exists()) {

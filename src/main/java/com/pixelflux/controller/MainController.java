@@ -6,6 +6,9 @@ import com.pixelflux.service.ImageConverter;
 import com.pixelflux.service.MediaConverter;
 import com.pixelflux.service.VideoConverter;
 import com.pixelflux.view.MainView;
+import javafx.application.Platform;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.stage.FileChooser;
 
 import java.awt.*;
@@ -75,7 +78,7 @@ public class MainController {
 
     public void handleConvert() {
         if(mediaFiles.isEmpty()) {
-            System.out.println("변환할 파일이 없습니다.");
+            mainView.getStatusLabel().setText("변환할 파일이 없습니다.");
             return;
         }
 
@@ -84,30 +87,55 @@ public class MainController {
         String quality = mainView.getQualityComboBox().getValue();
         ConvertOptions options = ConvertOptions.of(format, width, quality, null);
 
-        int successCount = 0;
-        int failCount = 0;
-        File outputFile = null;
-        for (MediaFile mediaFile : mediaFiles) {
-            MediaConverter converter = findConverter(mediaFile);
-            if(converter == null) {
-                failCount++;
-                System.out.println("지원하는 변환기가 아닙니다: " + mediaFile.name());
-                continue;
+        //프로그레스 바 추가
+        mainView.getProgressContainer().setVisible(true);
+        ProgressBar progressBar = mainView.getProgressBar();
+        Label progressLabel = mainView.getProgressLabel();
+
+        progressBar.setProgress(0.0);
+        progressLabel.setText("0%");
+        mainView.getConvertButton().setDisable(true);
+        int fileCount = mediaFiles.size();
+
+        //프로그레스바 구현을 위한 스레드 처리
+        new Thread(() -> {
+            int successCount = 0;
+            int failCount = 0;
+            File outputFile = null;
+            for (int i = 0; i < fileCount; i++) {
+                MediaFile mediaFile = mediaFiles.get(i);
+                MediaConverter converter = findConverter(mediaFile);
+                if(converter == null) {
+                    System.out.println("지원하는 변환기가 아닙니다: " + mediaFile.name());
+                    failCount++;
+                    continue;
+                }
+                try {
+                    outputFile = converter.convert(mediaFile, options);
+                    successCount++;
+                } catch (IOException e) {
+                    failCount++;
+                }
+                double progress = (double) (i + 1) / fileCount;
+                int percent = (int) Math.round(progress * 100);
+                Platform.runLater(() -> {
+                    progressBar.setProgress(progress);
+                    progressLabel.setText(percent + "%");
+                });
             }
 
-            try {
-                outputFile = converter.convert(mediaFile, options);
-                successCount++;
-            } catch (IOException e) {
-                failCount++;
-            }
-        }
-        mainView.getStatusLabel().setText(
-                String.format("완료 (성공: %d건, 실패: %d건)", successCount, failCount)
-        );
-        if(successCount > 0) {
-            openDirectory(outputFile.getParentFile());
-        }
+            int finalSuccess = successCount;
+            int finalFail = failCount;
+            Platform.runLater(() -> {
+                mainView.getConvertButton().setDisable(false);
+                mainView.getStatusLabel().setText(
+                        String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
+                );
+                if(finalSuccess > 0) {
+                    openDirectory(mediaFiles.getFirst().file().getParentFile());
+                }
+            });
+        }).start();
     }
 
     private MediaConverter findConverter(MediaFile mediaFile) {

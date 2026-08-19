@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 //레이아웃 구성
@@ -23,6 +24,10 @@ public class MainView {
     private Button convertButton;
     private Button addFileButton;
     private Button clearListButton;
+
+    private ProgressBar progressBar;
+    private Label progressLabel;
+    private StackPane progressContainer;
 
     public Parent createContent() {
         VBox root = new VBox(18); //간격 15
@@ -136,7 +141,28 @@ public class MainView {
                 "-fx-background-radius: 8; -fx-cursor: hand;"
         );
 
-        root.getChildren().addAll(dropZone, listActionBar, listView, optionBox, convertButton);
+        //진행률, 프로그레스바
+        progressBar = new ProgressBar(0);
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+        progressBar.setMinHeight(20);
+        progressBar.setStyle(
+                "-fx-accent: #38bdf8; " +
+                "-fx-control-inner-background: #e0f2fe; " +
+                "-fx-background-radius: 12; " +
+                "-fx-padding: 0;"
+        );
+        progressLabel = new Label("0%");
+        progressLabel.setStyle(
+                "-fx-font-size: 13px; " +
+                "-fx-font-weight: 800; " +
+                "-fx-text-fill: #0c4a6e; " +
+                "-fx-font-family: 'Apple SD Gothic Neo', sans-serif;"
+        );
+        progressContainer = new StackPane(progressBar, progressLabel);
+        progressContainer.setMaxWidth(Double.MAX_VALUE);
+        progressContainer.setVisible(false);
+
+        root.getChildren().addAll(dropZone, listActionBar, listView, optionBox, progressContainer, convertButton);
         return root;
     }
 
@@ -150,4 +176,7 @@ public class MainView {
     public Button getConvertButton() {return convertButton;}
     public Button getAddFileButton() {return addFileButton;}
     public Button getClearListButton() {return clearListButton;}
+    public ProgressBar getProgressBar() {return progressBar;}
+    public Label getProgressLabel() {return progressLabel;}
+    public StackPane getProgressContainer() {return progressContainer;}
 }

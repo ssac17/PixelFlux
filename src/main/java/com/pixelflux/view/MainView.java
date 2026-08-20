@@ -17,7 +17,6 @@ public class MainView {
     private Label dropZone;
     private Label statusLabel;
     private ListView<String> listView;
-
     private ComboBox<String> formatComboBox;
     private ComboBox<String> widthComboBox;
     private ComboBox<String> qualityComboBox;
@@ -25,7 +24,8 @@ public class MainView {
     private Button exitButton;
     private Button addFileButton;
     private Button clearListButton;
-
+    private Button selectFolderButton;
+    private Label savePathLabel;
     private ProgressBar progressBar;
     private Label progressLabel;
     private StackPane progressContainer;
@@ -39,14 +39,31 @@ public class MainView {
         // CSS 파일 로드
         root.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/mainview.css")).toExternalForm());
 
-        // 1. 드래그 앤 드롭 영역
+        // 드래그 앤 드롭 영역
         dropZone = new Label("📥 변환할 파일(이미지/동영상)을 여기에 끌어다 놓으세요\n(또는 클릭하여 Finder에서 파일 선택)");
         dropZone.setMaxWidth(Double.MAX_VALUE);
         dropZone.setMinHeight(140);
         dropZone.setAlignment(Pos.CENTER);
         dropZone.getStyleClass().add("drop-zone");
 
-        // 2. 파일 추가, 목록 비우기 액션 바
+        //저장 위치 폴더 선택
+
+        HBox savePathBar = new HBox(8);
+        savePathBar.setAlignment(Pos.CENTER_LEFT);
+        // 좌측 긴 회색 박스
+        savePathLabel = new Label("기본값: 원본 파일과 동일한 위치에 저장");
+        savePathLabel.setMinHeight(36);
+        savePathLabel.setMaxWidth(Double.MAX_VALUE);
+        savePathLabel.getStyleClass().add("path-display-box");
+        HBox.setHgrow(savePathLabel, Priority.ALWAYS);
+        // 맨 우측 폴더 선택 버튼
+        selectFolderButton = new Button("📂저장 폴더 선택");
+        selectFolderButton.setMinHeight(36);
+        selectFolderButton.getStyleClass().add("btn-secondary");
+
+        savePathBar.getChildren().addAll(savePathLabel, selectFolderButton);
+
+        // 파일 추가, 목록 비우기 액션 바
         HBox listActionBar = new HBox(12);
         listActionBar.setAlignment(Pos.CENTER_LEFT);
 
@@ -136,7 +153,7 @@ public class MainView {
 
         bottomActionBar.getChildren().addAll(convertButton, exitButton);
 
-        root.getChildren().addAll(dropZone, listActionBar, listView, optionBox, progressContainer, bottomActionBar);
+        root.getChildren().addAll(dropZone,savePathBar, listActionBar, listView, optionBox, progressContainer, bottomActionBar);
         return root;
     }
 

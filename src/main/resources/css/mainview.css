@@ -20,6 +20,18 @@
     -fx-cursor: hand;
 }
 
+/* 저장 경로 표시용 회색 박스 */
+.path-display-box {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: bold;
+}
+
 /*  상단 액션 버튼 & 라벨 */
 .btn-secondary {
     -fx-background-color: #ffffff;
@@ -111,7 +123,7 @@
 .custom-progress-bar {
     -fx-accent: #38bdf8;
     -fx-control-inner-background: #e0f2fe;
-    -fx-pref-height: 28px;               /* 💡 기본 높이 확장 (가늘던 부분 개선) */
+    -fx-pref-height: 28px;
     -fx-min-height: 28px;
     -fx-background-radius: 10px;
     -fx-padding: 0;

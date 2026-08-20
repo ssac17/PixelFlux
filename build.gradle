@@ -34,11 +34,20 @@ javafx {
 
 application {
     mainClass = 'com.pixelflux.Launcher'
-    applicationDefaultJvmArgs = ['-Dfile.encoding=UTF-8']
+    applicationDefaultJvmArgs = [
+            '-Dfile.encoding=UTF-8',
+            '-Xdock:name=PixelFlux'
+    ]
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 jar {

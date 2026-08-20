@@ -17,6 +17,7 @@ public class MainView {
     private Label dropZone;
     private Label statusLabel;
     private ListView<String> listView;
+    private HBox optionBox;
     private ComboBox<String> formatComboBox;
     private ComboBox<String> widthComboBox;
     private ComboBox<String> qualityComboBox;
@@ -26,7 +27,7 @@ public class MainView {
     private Button clearListButton;
     private Button selectFolderButton;
     private Label savePathLabel;
-    private Label paLabel;
+    private Label pathLabel;
     private ProgressBar progressBar;
     private Label progressLabel;
     private StackPane progressContainer;
@@ -48,14 +49,12 @@ public class MainView {
         dropZone.getStyleClass().add("drop-zone");
 
         //저장 위치 폴더 선택
-
         HBox savePathBar = new HBox(8);
         savePathBar.setAlignment(Pos.CENTER_LEFT);
         //라벨
-        paLabel = new Label("저장 경로:");
-        paLabel.setMinHeight(35);
-        paLabel.setMaxWidth(Double.MAX_VALUE);
-        paLabel.getStyleClass().add("option-label");
+        pathLabel = new Label("저장 경로:");
+        pathLabel.setMinHeight(35);
+        pathLabel.getStyleClass().add("option-label");
         // 좌측 긴 회색 박스
         savePathLabel = new Label("기본값: 원본 파일과 동일한 위치에 저장");
         savePathLabel.setMinHeight(36);
@@ -67,7 +66,7 @@ public class MainView {
         selectFolderButton.setMinHeight(36);
         selectFolderButton.getStyleClass().add("btn-secondary");
 
-        savePathBar.getChildren().addAll(paLabel, savePathLabel, selectFolderButton);
+        savePathBar.getChildren().addAll(pathLabel, savePathLabel, selectFolderButton);
 
         // 파일 추가, 목록 비우기 액션 바
         HBox listActionBar = new HBox(12);
@@ -98,7 +97,7 @@ public class MainView {
         listView.setContextMenu(contextMenu);
 
         // 4. 변환 옵션 바
-        HBox optionBox = new HBox(16);
+        optionBox = new HBox(16);
         optionBox.setAlignment(Pos.CENTER_LEFT);
         optionBox.getStyleClass().add("option-box");
 
@@ -167,6 +166,7 @@ public class MainView {
     public Label getDropZone() { return dropZone; }
     public Label getStatusLabel() { return statusLabel; }
     public ListView<String> getListView() { return listView; }
+    public HBox getOptionBox() {return optionBox;}
     public ComboBox<String> getFormatComboBox() { return formatComboBox; }
     public ComboBox<String> getWidthComboBox() { return widthComboBox; }
     public ComboBox<String> getQualityComboBox() { return qualityComboBox; }

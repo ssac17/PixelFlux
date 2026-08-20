@@ -137,7 +137,7 @@ public class MainController {
 
         progressBar.setProgress(0.0);
         progressLabel.setText("0%");
-        mainView.getConvertButton().setDisable(true);
+        setButtonsDisable(true);
         int fileCount = mediaFiles.size();
 
         //변환 병렬 처리
@@ -188,7 +188,7 @@ public class MainController {
             int finalSuccess = successCount.get();
             int finalFail = failCount.get();
             Platform.runLater(() -> {
-                mainView.getConvertButton().setDisable(false);
+                setButtonsDisable(false);
                 mainView.getStatusLabel().setText(
                         String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
                 );
@@ -287,5 +287,19 @@ public class MainController {
                         (mediaFile.isVideo() && converter instanceof VideoConverter))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void setButtonsDisable(boolean disable) {
+        //Node 기반 컴포넌트 일괄 disable
+        List.of(
+                mainView.getSelectFolderButton(),
+                mainView.getAddFileButton(),
+                mainView.getDropZone(),
+                mainView.getClearListButton(),
+                mainView.getConvertButton(),
+                mainView.getExitButton(),
+                mainView.getOptionBox()
+        ).forEach(node -> node.setDisable(disable));
+        mainView.getDeleteMenuItem().setDisable(disable);
     }
 }

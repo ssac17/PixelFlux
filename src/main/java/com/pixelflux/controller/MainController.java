@@ -8,15 +8,15 @@ import com.pixelflux.service.VideoConverter;
 import com.pixelflux.util.Utils;
 import com.pixelflux.view.MainView;
 import javafx.application.Platform;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
 import java.awt.*;
 import java.io.File;
@@ -33,6 +33,7 @@ public class MainController {
     private final List<MediaConverter> converters;
     private final MainView mainView;
     private final List<MediaFile> mediaFiles;
+    private File targetDirectory = null;
 
     public MainController(List<MediaConverter> converters, MainView mainView) {
         this.converters = converters;
@@ -42,53 +43,34 @@ public class MainController {
     }
 
     public void initEventHandlers() {
-        // 버튼 클릭 이벤트 연결
-        mainView.getAddFileButton().setOnAction(e -> handleAddFiles()); //파일 추가
-        mainView.getDropZone().setOnMouseClicked(e -> handleAddFiles()); //파일 추가
-        DragAndDropAddFiles(); //드래그 앤 드랍으로 파일 추가
-        mainView.getClearListButton().setOnAction(e -> handleClearList()); //파일 목록 지우기
-        mainView.getConvertButton().setOnAction(e -> handleConvert()); //변환
-        mainView.getExitButton().setOnAction(e -> handleExit()); //종료
-        mainView.getDeleteMenuItem().setOnAction(e -> deleteSelectFile());
-        setupDeleteKeyEvent();
+        setupDeleteKeyEvent();                                                                 //파일 삭제, key이벤트 추가
+        DragAndDropAddFiles();                                                                 //드래그 앤 드랍으로 파일 추가
+        /* 버튼 클릭 이벤트 연결 */
+        mainView.getSelectFolderButton().setOnAction(e -> handleSelectFolder());    //저장 폴더 선택
+        mainView.getAddFileButton().setOnAction(e -> handleAddFiles());             //파일 추가
+        mainView.getDropZone().setOnMouseClicked(e -> handleAddFiles());            //파일 추가
+        mainView.getClearListButton().setOnAction(e -> handleClearList());          //파일 목록 지우기
+        mainView.getConvertButton().setOnAction(e -> handleConvert());              //파일 변환
+        mainView.getExitButton().setOnAction(e -> handleExit());                    //종료
+        mainView.getDeleteMenuItem().setOnAction(e -> deleteSelectFile());          //목록에 파일 삭제
     }
 
-    private void setupDeleteKeyEvent() {
-        ListView<String> listView = mainView.getListView();
-        listView.setOnKeyPressed(event -> {
-            KeyCode keyCode = event.getCode();
-            if(keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
-                deleteSelectFile();
-                event.consume();
-            }
-        });
-    }
+    private void handleSelectFolder() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("변환 파일 저장 폴더 선택");
 
-    private void deleteSelectFile() {
-        ListView<String> listView = mainView.getListView();
-        int selectedIndex = listView.getSelectionModel().getSelectedIndex();
-
-        if(selectedIndex < 0 || selectedIndex >= mediaFiles.size()) {
-            return;
+        // 이전에 선택한 폴더가 있다면 그 위치를 기본 열림 위치로 지정
+        if (targetDirectory != null && targetDirectory.exists()) {
+            directoryChooser.setInitialDirectory(targetDirectory);
         }
-        //목록에서 파일 삭제
-        mediaFiles.remove(selectedIndex);
-        listView.getItems().remove(selectedIndex);
 
-        //남아있는 파일 기준 상태 라벨 갱신
-        int remainingSize = listView.getItems().size();
-        if (remainingSize == 0) {
-            mainView.getStatusLabel().setText("");
-        } else {
-            String firstItem = listView.getItems().getFirst();
-            int index = firstItem.indexOf("(");
-            String firstFileName = (index != -1) ? firstItem.substring(0, index).trim() : firstItem;
-
-            String statusMsg = (remainingSize == 1) ? firstFileName : firstFileName + "    포함: " + remainingSize;
-            mainView.getStatusLabel().setText(statusMsg);
+        Window window = mainView.getSelectFolderButton().getScene().getWindow();
+        File selectedDir = directoryChooser.showDialog(window);
+        if (selectedDir != null) {
+            this.targetDirectory = selectedDir;
+            mainView.getSavePathLabel().setText(selectedDir.getAbsolutePath());
         }
     }
-
 
     private void handleAddFiles() {
         FileChooser fileChooser = new FileChooser();
@@ -146,7 +128,7 @@ public class MainController {
         String format = mainView.getFormatComboBox().getValue();
         String width = mainView.getWidthComboBox().getValue();
         String quality = mainView.getQualityComboBox().getValue();
-        ConvertOptions options = ConvertOptions.of(format, width, quality, null);
+        ConvertOptions options = ConvertOptions.of(format, width, quality, targetDirectory);
 
         //프로그레스 바 추가
         mainView.getProgressContainer().setVisible(true);
@@ -211,10 +193,47 @@ public class MainController {
                         String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
                 );
                 if (finalSuccess > 0) {
-                    Utils.openDirectory(mediaFiles.getFirst().file().getParentFile());
+                    File openDir = (targetDirectory != null) ? targetDirectory : mediaFiles.getFirst().file().getParentFile();
+                    Utils.openDirectory(openDir);
                 }
             });
         }).start();
+    }
+
+    private void setupDeleteKeyEvent() {
+        ListView<String> listView = mainView.getListView();
+        listView.setOnKeyPressed(event -> {
+            KeyCode keyCode = event.getCode();
+            if(keyCode == KeyCode.DELETE || keyCode == KeyCode.BACK_SPACE) {
+                deleteSelectFile();
+                event.consume();
+            }
+        });
+    }
+
+    private void deleteSelectFile() {
+        ListView<String> listView = mainView.getListView();
+        int selectedIndex = listView.getSelectionModel().getSelectedIndex();
+
+        if(selectedIndex < 0 || selectedIndex >= mediaFiles.size()) {
+            return;
+        }
+        //목록에서 파일 삭제
+        mediaFiles.remove(selectedIndex);
+        listView.getItems().remove(selectedIndex);
+
+        //남아있는 파일 기준 상태 라벨 갱신
+        int remainingSize = listView.getItems().size();
+        if (remainingSize == 0) {
+            mainView.getStatusLabel().setText("");
+        } else {
+            String firstItem = listView.getItems().getFirst();
+            int index = firstItem.indexOf("(");
+            String firstFileName = (index != -1) ? firstItem.substring(0, index).trim() : firstItem;
+
+            String statusMsg = (remainingSize == 1) ? firstFileName : firstFileName + "    포함: " + remainingSize;
+            mainView.getStatusLabel().setText(statusMsg);
+        }
     }
 
     private void handleExit() {

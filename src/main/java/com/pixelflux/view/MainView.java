@@ -26,6 +26,7 @@ public class MainView {
     private Button clearListButton;
     private Button selectFolderButton;
     private Label savePathLabel;
+    private Label paLabel;
     private ProgressBar progressBar;
     private Label progressLabel;
     private StackPane progressContainer;
@@ -50,6 +51,11 @@ public class MainView {
 
         HBox savePathBar = new HBox(8);
         savePathBar.setAlignment(Pos.CENTER_LEFT);
+        //라벨
+        paLabel = new Label("저장 경로:");
+        paLabel.setMinHeight(35);
+        paLabel.setMaxWidth(Double.MAX_VALUE);
+        paLabel.getStyleClass().add("option-label");
         // 좌측 긴 회색 박스
         savePathLabel = new Label("기본값: 원본 파일과 동일한 위치에 저장");
         savePathLabel.setMinHeight(36);
@@ -61,7 +67,7 @@ public class MainView {
         selectFolderButton.setMinHeight(36);
         selectFolderButton.getStyleClass().add("btn-secondary");
 
-        savePathBar.getChildren().addAll(savePathLabel, selectFolderButton);
+        savePathBar.getChildren().addAll(paLabel, savePathLabel, selectFolderButton);
 
         // 파일 추가, 목록 비우기 액션 바
         HBox listActionBar = new HBox(12);
@@ -172,4 +178,7 @@ public class MainView {
     public Label getProgressLabel() { return progressLabel; }
     public StackPane getProgressContainer() { return progressContainer; }
     public MenuItem getDeleteMenuItem() { return deleteMenuItem; }
+    private ContextMenu getContextMenu() {return contextMenu;}
+    public Button getSelectFolderButton() {return selectFolderButton;}
+    public Label getSavePathLabel() {return savePathLabel;}
 }

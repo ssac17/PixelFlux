@@ -8,8 +8,10 @@ import com.pixelflux.service.VideoConverter;
 import com.pixelflux.util.Utils;
 import com.pixelflux.view.MainView;
 import javafx.application.Platform;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
@@ -47,6 +49,7 @@ public class MainController {
         mainView.getClearListButton().setOnAction(e -> handleClearList()); //파일 목록 지우기
         mainView.getConvertButton().setOnAction(e -> handleConvert()); //변환
         mainView.getExitButton().setOnAction(e -> handleExit()); //종료
+        mainView.getDeleteMenuItem().setOnAction(e -> deleteSelectFile());
         setupDeleteKeyEvent();
     }
 

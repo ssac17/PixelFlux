@@ -28,6 +28,8 @@ public class MainView {
     private ProgressBar progressBar;
     private Label progressLabel;
     private StackPane progressContainer;
+    private ContextMenu contextMenu;
+    private MenuItem deleteMenuItem;
 
     public Parent createContent() {
         VBox root = new VBox(18); //간격
@@ -173,6 +175,18 @@ public class MainView {
         progressContainer.setMaxWidth(Double.MAX_VALUE);
         progressContainer.setVisible(false);
 
+        contextMenu = new ContextMenu();
+        contextMenu.setStyle(
+                "-fx-background-color: #ffffff; -fx-background-radius: 12px; -fx-border-radius: 12px; -fx-border-color: #e2e8f0; " +
+                "-fx-border-width: 1px; -fx-padding: 4px; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 10, 0, 0, 4);"
+        );
+        deleteMenuItem = new MenuItem("목록에서 제거");
+        deleteMenuItem.setStyle(
+                "-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 6 14;"
+        );
+        contextMenu.getItems().addAll(deleteMenuItem);
+        listView.setContextMenu(contextMenu);
+
         root.getChildren().addAll(dropZone, listActionBar, listView, optionBox, progressContainer, bottomActionBar);
         return root;
     }
@@ -191,4 +205,5 @@ public class MainView {
     public ProgressBar getProgressBar() {return progressBar;}
     public Label getProgressLabel() {return progressLabel;}
     public StackPane getProgressContainer() {return progressContainer;}
+    public MenuItem getDeleteMenuItem() {return deleteMenuItem;}
 }

@@ -7,5 +7,5 @@ import java.io.File;
 import java.io.IOException;
 
 public interface MediaConverter {
-    public File convert(MediaFile mediaFile, ConvertOptions options) throws IOException;
+    File convert(MediaFile mediaFile, ConvertOptions options) throws IOException;
 }

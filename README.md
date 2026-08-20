@@ -282,13 +282,11 @@ java -jar build/libs/PixelFlux-1.0-SNAPSHOT-all.jar
 
 ## 📈 향후 개선 사항
 
-- [ ] Windows/Linux 플랫폼 지원
+- [ ] Windows 플랫폼 지원
 - [ ] GIF 애니메이션 처리
 - [ ] 배치 프로세싱 설정 저장/불러오기
 - [ ] 자동 워터마크 추가 기능
-- [ ] 클라우드 스토리지 연동 (Google Drive, Dropbox)
 - [ ] 커스텀 이름 규칙 적용
-- [ ] 영상 자막 삽입 기능
 
 ---
 
@@ -300,7 +298,6 @@ MIT License
 
 ## 👨‍💻 개발 정보
 
-**개발자**: [황하늘]
 **주요 학습 포인트**:
 - JavaFX를 통한 데스크톱 애플리케이션 개발
 - FFmpeg 통합 및 동영상 인코딩 최적화

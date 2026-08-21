@@ -298,7 +298,8 @@ public class MainController {
                 mainView.getClearListButton(),
                 mainView.getConvertButton(),
                 mainView.getExitButton(),
-                mainView.getOptionBox()
+                mainView.getOptionBox(),
+                mainView.getListView()
         ).forEach(node -> node.setDisable(disable));
         mainView.getDeleteMenuItem().setDisable(disable);
     }

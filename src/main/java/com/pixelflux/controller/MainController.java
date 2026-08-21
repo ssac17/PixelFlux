@@ -117,6 +117,8 @@ public class MainController {
         mainView.getStatusLabel().setText("");
         mediaFiles.clear();
         mainView.getListView().getItems().clear();
+        mainView.getProgressBar().setProgress(0);
+        mainView.getProgressLabel().setText("0%");
     }
 
     private void handleConvert() {

@@ -139,7 +139,6 @@ public class MainView {
 
         progressContainer = new StackPane(progressBar, progressLabel);
         progressContainer.setMaxWidth(Double.MAX_VALUE);
-        progressContainer.setVisible(false);
 
         // 6. 하단 변환 및 종료 버튼
         HBox bottomActionBar = new HBox(12);

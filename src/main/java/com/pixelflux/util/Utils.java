@@ -42,8 +42,14 @@ public class Utils {
         String baseName = (dotIndex != -1) ? fileName.substring(0, dotIndex) : fileName;
 
         String targetExt = options.targetFormat().toLowerCase();
-        String newExtension = targetExt.startsWith(".") ? targetExt.substring(1) : targetExt;
-
+        String newExtension = targetExt;
+        if (mediaFile.isVideo()) {
+            if ("gif".equals(targetExt)) {
+                newExtension = "gif";
+            } else {
+                newExtension = "mp4";
+            }
+        }
         String initName = baseName + "_converted." + newExtension;
         File newFile = new File(parentDir, initName);
 

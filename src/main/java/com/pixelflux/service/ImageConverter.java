@@ -19,7 +19,7 @@ public class ImageConverter implements MediaConverter {
         File targetDir = (options.outputDirectory() != null) ? options.outputDirectory() : mediaFile.file().getParentFile();
 
         if(targetDir != null && !targetDir.exists()) {
-            targetDir.mkdir();
+            targetDir.mkdirs();
         }
 
         File outputFile = Utils.generateOutputFile(mediaFile, options);

@@ -291,16 +291,17 @@ public class MainView {
         return root;
     }
 
-    public void switchTab(boolean isGifTab) {
-        formatViewRoot.setVisible(!isGifTab);
-        gifViewRoot.setVisible(isGifTab);
-        //css
+    public void switchTab(boolean isGeneralTab) {
+        formatViewRoot.setVisible(isGeneralTab);
+        gifViewRoot.setVisible(!isGeneralTab);
+
         tabFormatBtn.getStyleClass().remove("segment-tab-active");
         tabGifBtn.getStyleClass().remove("segment-tab-active");
-        if (isGifTab) {
-            tabGifBtn.getStyleClass().add("segment-tab-active");
-        } else {
+
+        if (isGeneralTab) {
             tabFormatBtn.getStyleClass().add("segment-tab-active");
+        } else {
+            tabGifBtn.getStyleClass().add("segment-tab-active");
         }
     }
 

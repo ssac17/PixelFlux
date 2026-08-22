@@ -30,33 +30,36 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MainController {
 
     private final MainView mainView;
-    private final List<MediaFile> mediaFiles;
+    private final List<MediaFile> generalMediaFiles;
+    private final List<MediaFile> gifMediaFiles;
     private File targetDirectory = null;
 
     private ImageConverter imageConverter;
     private VideoConverter videoConverter;
 
-    private boolean isGifTabActive = false;
+    private boolean isGeneralActive = true;
 
-    public boolean isGifTabActive() {
-        return isGifTabActive;
-    }
+    public boolean isGeneralActive() {return isGeneralActive;}
+    public List<MediaFile> getCurrentMediaFiles() {return isGeneralActive ? generalMediaFiles : gifMediaFiles;}
+    public ListView<String> getCurrentListView() {return isGeneralActive ? mainView.getListView() : mainView.getGifListView();}
+    public Label getCurrentStatusLabel() {return isGeneralActive ? mainView.getStatusLabel() : mainView.getGifStatusLabel();}
 
     public MainController(MainView mainView) {
         this.mainView = mainView;
-        this.mediaFiles = new ArrayList<>();
+        this.generalMediaFiles = new ArrayList<>();
+        this.gifMediaFiles = new ArrayList<>();
         initEventHandlers();
     }
 
     public void initEventHandlers() {
         //탭 스위치 이벤트
         mainView.getTabFormatBtn().setOnAction(e -> {
-            isGifTabActive = false;
-            mainView.switchTab(false);
+            isGeneralActive = true;
+            mainView.switchTab(true);
         });
         mainView.getTabGifBtn().setOnAction(e -> {
-            isGifTabActive = true;
-            mainView.switchTab(true);
+            isGeneralActive = false;
+            mainView.switchTab(false);
         });
 
         setupDeleteKeyEvent();                                                                 //파일 삭제, key이벤트 추가
@@ -69,6 +72,10 @@ public class MainController {
         mainView.getConvertButton().setOnAction(e -> handleConvert());              //파일 변환
         mainView.getExitButton().setOnAction(e -> handleExit());                    //종료
         mainView.getDeleteMenuItem().setOnAction(e -> deleteSelectFile());          //목록에 파일 삭제
+
+        mainView.getGifDropZone().setOnMouseClicked(e -> handleAddFiles());
+        mainView.getGifAddFileButton().setOnAction(e -> handleAddFiles());
+        mainView.getGifClearButton().setOnAction(e -> handleClearList());
 
     }
 
@@ -91,18 +98,25 @@ public class MainController {
 
     private void handleAddFiles() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("변환할 이미지/동영상 선택");
-        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(
-                "Media Files", "*.jpg", "*.jpeg", "*.png", "*.webp", "*.mp4", "*.mov");
-        fileChooser.getExtensionFilters().add(filter);
+        if(isGeneralActive) {
+            fileChooser.setTitle("변환할 이미지/동영상 선택");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Media Files", "*.jpg", "*.jpeg", "*.png", "*.webp", "*.mp4", "*.mov"));
+        }else {
+            fileChooser.setTitle("변환할 동영상 선택");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Media Files","*.webp", "*.mp4", "*.mov"));
+        }
+        Window window = isGeneralActive
+                ? mainView.getDropZone().getScene().getWindow()
+                : mainView.getGifDropZone().getScene().getWindow();
 
-        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(mainView.getDropZone().getScene().getWindow());
+        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(window);
         if(selectedFiles == null || selectedFiles.isEmpty()) {
             return;
         }
-
         String statusMsg = addFiles(selectedFiles);
-        mainView.getStatusLabel().setText(statusMsg);
+        getCurrentStatusLabel().setText(statusMsg);
     }
 
     private void DragAndDropAddFiles() {
@@ -129,17 +143,17 @@ public class MainController {
         });
     }
 
-
     private void handleClearList() {
-        mainView.getStatusLabel().setText("");
-        mediaFiles.clear();
-        mainView.getListView().getItems().clear();
+            getCurrentStatusLabel().setText("");
+            getCurrentMediaFiles().clear();
+            getCurrentListView().getItems().clear();
+
         mainView.getProgressBar().setProgress(0);
         mainView.getProgressLabel().setText("0%");
     }
 
     private void handleConvert() {
-        if(mediaFiles.isEmpty()) {
+        if(generalMediaFiles.isEmpty()) {
             mainView.getStatusLabel().setText("변환할 파일이 없습니다.");
             return;
         }
@@ -157,7 +171,7 @@ public class MainController {
         progressBar.setProgress(0.0);
         progressLabel.setText("0%");
         setButtonsDisable(true);
-        int fileCount = mediaFiles.size();
+        int fileCount = generalMediaFiles.size();
 
         //변환 병렬 처리
         new Thread(() -> {
@@ -169,7 +183,7 @@ public class MainController {
             AtomicInteger failCount = new AtomicInteger(0);
             AtomicInteger completedCount = new AtomicInteger(0); // 💡 프로그레스 바 계산용
 
-            for (MediaFile mediaFile : mediaFiles) {
+            for (MediaFile mediaFile : generalMediaFiles) {
                 executor.submit(() -> {
                     MediaConverter converter = findConverter(mediaFile);
                     if (converter == null) {
@@ -212,7 +226,7 @@ public class MainController {
                         String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
                 );
                 if (finalSuccess > 0) {
-                    File openDir = (targetDirectory != null) ? targetDirectory : mediaFiles.getFirst().file().getParentFile();
+                    File openDir = (targetDirectory != null) ? targetDirectory : generalMediaFiles.getFirst().file().getParentFile();
                     Utils.openDirectory(openDir);
                 }
             });
@@ -234,11 +248,11 @@ public class MainController {
         ListView<String> listView = mainView.getListView();
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
 
-        if(selectedIndex < 0 || selectedIndex >= mediaFiles.size()) {
+        if(selectedIndex < 0 || selectedIndex >= generalMediaFiles.size()) {
             return;
         }
         //목록에서 파일 삭제
-        mediaFiles.remove(selectedIndex);
+        generalMediaFiles.remove(selectedIndex);
         listView.getItems().remove(selectedIndex);
 
         //남아있는 파일 기준 상태 라벨 갱신
@@ -262,32 +276,34 @@ public class MainController {
 
     private String addFiles(List<File> addFiles) {
         if (addFiles == null || addFiles.isEmpty()) {
-            return mainView.getStatusLabel().getText();
+            return getCurrentStatusLabel().getText();
         }
-        int addedCount = 0;
+        List<MediaFile> targetList = getCurrentMediaFiles();
+        ListView<String> targetListView = getCurrentListView();
+
         int skippedCount = 0;
         for (File file : addFiles) {
             MediaFile media = MediaFile.from(file);
             System.out.println(media);
-            if(!media.isImage() && !media.isVideo()) {
+            boolean isValid = isGeneralActive ? (media.isImage() || media.isVideo()) : media.isVideo();
+            if(!isValid) {
                 skippedCount++;
                 continue;
             }
-            if(!mediaFiles.contains(media)) {
-                mediaFiles.add(media);
-                addedCount++;
+            if(!targetList.contains(media)) {
+                targetList.add(media);
                 // 화면 ListView에도 추가 (파일명 + 용량 표시)
-                mainView.getListView().getItems().add(media.name() + " (" + (media.formattedSize() + ")"));
+                targetListView.getItems().add(media.name() + " (" + (media.formattedSize() + ")"));
             }
         }
 
-        int mainViewSize = mainView.getListView().getItems().size();
+        int mainViewSize = targetListView.getItems().size();
         // 💡 리스트가 아예 비어있는 경우 (전부 미지원 파일 등)
         if (mainViewSize == 0) {
             return skippedCount > 0 ? "지원하지 않는 파일입니다. (미지원 " + skippedCount + "건)" : "";
         }
 
-        String firstItem = mainView.getListView().getItems().getFirst();
+        String firstItem = targetListView.getItems().getFirst();
         int index = firstItem.indexOf("(");
         String firstFileName = (index != -1) ? firstItem.substring(0, index).trim() : firstItem;
 

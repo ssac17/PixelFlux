@@ -224,7 +224,7 @@ public class MainView {
         fpsLabel.getStyleClass().add("option-label");
         gifFpsComboBox = new ComboBox<>();
         gifFpsComboBox.setMinWidth(130);
-        gifFpsComboBox.getItems().addAll("10 FPS (경량)", "15 FPS (표준 권장)", "24 FPS (부드러움)");
+        gifFpsComboBox.getItems().addAll("10 FPS (경량)", "15 FPS (표준 권장)", "24 FPS (부드러움)", "30 FPS (최고)");
         gifFpsComboBox.setValue("15 FPS (표준 권장)");
         gifFpsComboBox.getStyleClass().add("option-combo");
 

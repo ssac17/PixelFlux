@@ -36,13 +36,13 @@ public record ConvertOptions (
     public static ConvertOptions ofGif(String fpsStr, String widthStr, String qualityStr, File outputDir) {
         //확장자는 gif로 고정
         String format = "gif";
-
         //FPS 파싱 ("15 FPS (표준 권장)" -> 15, 미선택 시 기본값 15)
         Integer fps = 15;
         if(fpsStr != null) {
-            String numOnly = widthStr.replaceAll("[^0-9]", "");
+            String numOnly = fpsStr.replaceAll("[^0-9]", "");
             if (!numOnly.isEmpty()) {
                 fps = Integer.parseInt(numOnly);
+                System.out.println("fps = " + fps);
             }
         }
 

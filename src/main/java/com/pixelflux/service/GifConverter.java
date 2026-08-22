@@ -3,6 +3,8 @@ package com.pixelflux.service;
 import com.pixelflux.model.ConvertOptions;
 import com.pixelflux.model.MediaFile;
 import com.pixelflux.util.Utils;
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 
@@ -17,7 +19,6 @@ public class GifConverter implements MediaConverter {
         }
 
         File targetDir = (options.outputDirectory() != null) ? options.outputDirectory() : mediaFile.file().getParentFile();
-
         if(targetDir != null && !targetDir.exists()) {
             targetDir.mkdirs();
         }
@@ -49,16 +50,17 @@ public class GifConverter implements MediaConverter {
 
             try(FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outputFile, targetWidth, targetHeight)) {
                 recorder.setFormat("gif");
+                recorder.setVideoCodec(avcodec.AV_CODEC_ID_GIF);
+                recorder.setPixelFormat(avutil.AV_PIX_FMT_RGB8);
                 recorder.setAudioChannels(0); //오디오 없음
                 recorder.setFrameRate(targetFps);
 
-                // 고화질 256색 팔레트 필터 세팅
-                boolean isHighQuality = options.quality() >= 1.0;
-                String ditherAlgorithm = isHighQuality ? "lanczos" : "bayer";
-                String filter = String.format("fps=%.0f,scale=%d:%d:flags=%s,split[s0][s1];[s0]palettegen=max_colors=256[p];[s1][p]paletteuse=dither=%s",
-                        targetFps, targetWidth, targetHeight, ditherAlgorithm, ditherAlgorithm);
-
-                recorder.setVideoOption("vf", filter);
+                // 화질 옵션 반영
+                if (options.quality() >= 1.0) {
+                    recorder.setVideoOption("q:v", "1");
+                } else {
+                    recorder.setVideoOption("q:v", "5");
+                }
                 recorder.start();
 
                 //프레임 순회 및 저장

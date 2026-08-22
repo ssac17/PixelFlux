@@ -65,8 +65,12 @@ public class Utils {
 
     public static void transferFrames(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder) throws IOException {
         Frame frame;
+        boolean hasAudio = recorder.getAudioChannels() > 0;
         // 비디오/이미지 프레임 순차 복사
         while ((frame = grabber.grab()) != null) {
+            if(!hasAudio && frame.samples != null) {
+                continue;
+            }
             recorder.record(frame);
         }
         recorder.stop();

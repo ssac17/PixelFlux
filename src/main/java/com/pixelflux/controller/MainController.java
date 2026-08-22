@@ -2,12 +2,14 @@ package com.pixelflux.controller;
 
 import com.pixelflux.model.ConvertOptions;
 import com.pixelflux.model.MediaFile;
+import com.pixelflux.service.GifConverter;
 import com.pixelflux.service.ImageConverter;
 import com.pixelflux.service.MediaConverter;
 import com.pixelflux.service.VideoConverter;
 import com.pixelflux.util.Utils;
 import com.pixelflux.view.MainView;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
@@ -36,6 +38,7 @@ public class MainController {
 
     private ImageConverter imageConverter;
     private VideoConverter videoConverter;
+    private GifConverter gifConverter;
 
     private boolean isGeneralActive = true;
 
@@ -120,26 +123,27 @@ public class MainController {
     }
 
     private void DragAndDropAddFiles() {
-        Label dropZone = mainView.getDropZone();
-        //파일 올리면 마우스 +버튼 변경
-        dropZone.setOnDragOver(event -> {
-            if(event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-            }
-            event.consume();
-        });
+        List<Label> dropZones = List.of(mainView.getDropZone(), mainView.getGifDropZone());
 
-        dropZone.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            boolean result = false;
-            if(db.hasFiles()) {
-                List<File> droppedFiles = db.getFiles();
-                String StatusMsg = addFiles(droppedFiles);
-                mainView.getStatusLabel().setText(StatusMsg);
-                result = true;
-            }
-            event.setDropCompleted(result);
-            event.consume();
+        dropZones.forEach(zone -> {
+            zone.setOnDragOver(event -> {
+                if(event.getDragboard().hasFiles()) {
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                }
+                event.consume();
+            });
+            zone.setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+                boolean result = false;
+                if (db.hasFiles()) {
+                    List<File> droppedFiles = db.getFiles();
+                    String statusMsg = addFiles(droppedFiles);
+                    getCurrentStatusLabel().setText(statusMsg);
+                    result = true;
+                }
+                event.setDropCompleted(result);
+                event.consume();
+            });
         });
     }
 
@@ -153,15 +157,25 @@ public class MainController {
     }
 
     private void handleConvert() {
-        if(generalMediaFiles.isEmpty()) {
-            mainView.getStatusLabel().setText("변환할 파일이 없습니다.");
+        List<MediaFile> currentMediaFiles = getCurrentMediaFiles();
+        if(currentMediaFiles.isEmpty()) {
+            getCurrentStatusLabel().setText("변환할 파일이 없습니다.");
             return;
         }
 
-        String format = mainView.getFormatComboBox().getValue();
-        String width = mainView.getWidthComboBox().getValue();
-        String quality = mainView.getQualityComboBox().getValue();
-        ConvertOptions options = ConvertOptions.of(format, width, quality, targetDirectory);
+        ConvertOptions options;
+        if(isGeneralActive) {
+            String format = mainView.getFormatComboBox().getValue();
+            String width = mainView.getWidthComboBox().getValue();
+            String quality = mainView.getQualityComboBox().getValue();
+            options = ConvertOptions.of(format, width, quality, targetDirectory);
+        }else {
+            String fps = mainView.getGifFpsComboBox().getValue();
+            String width = mainView.getGifWidthComboBox().getValue();
+            String quality = mainView.getGifQualityComboBox().getValue();
+            options = ConvertOptions.ofGif(fps, width, quality, targetDirectory);
+        }
+
 
         //프로그레스 바 추가
         mainView.getProgressContainer().setVisible(true);
@@ -171,7 +185,7 @@ public class MainController {
         progressBar.setProgress(0.0);
         progressLabel.setText("0%");
         setButtonsDisable(true);
-        int fileCount = generalMediaFiles.size();
+        int fileCount = currentMediaFiles.size();
 
         //변환 병렬 처리
         new Thread(() -> {
@@ -183,7 +197,7 @@ public class MainController {
             AtomicInteger failCount = new AtomicInteger(0);
             AtomicInteger completedCount = new AtomicInteger(0); // 💡 프로그레스 바 계산용
 
-            for (MediaFile mediaFile : generalMediaFiles) {
+            for (MediaFile mediaFile : currentMediaFiles) {
                 executor.submit(() -> {
                     MediaConverter converter = findConverter(mediaFile);
                     if (converter == null) {
@@ -222,11 +236,11 @@ public class MainController {
             int finalFail = failCount.get();
             Platform.runLater(() -> {
                 setButtonsDisable(false);
-                mainView.getStatusLabel().setText(
+                getCurrentStatusLabel().setText(
                         String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
                 );
                 if (finalSuccess > 0) {
-                    File openDir = (targetDirectory != null) ? targetDirectory : generalMediaFiles.getFirst().file().getParentFile();
+                    File openDir = (targetDirectory != null) ? targetDirectory : currentMediaFiles.getFirst().file().getParentFile();
                     Utils.openDirectory(openDir);
                 }
             });
@@ -245,27 +259,28 @@ public class MainController {
     }
 
     private void deleteSelectFile() {
+        List<MediaFile> currentMediaFiles = getCurrentMediaFiles();
         ListView<String> listView = mainView.getListView();
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
 
-        if(selectedIndex < 0 || selectedIndex >= generalMediaFiles.size()) {
+        if(selectedIndex < 0 || selectedIndex >= currentMediaFiles.size()) {
             return;
         }
         //목록에서 파일 삭제
-        generalMediaFiles.remove(selectedIndex);
+        currentMediaFiles.remove(selectedIndex);
         listView.getItems().remove(selectedIndex);
 
         //남아있는 파일 기준 상태 라벨 갱신
         int remainingSize = listView.getItems().size();
         if (remainingSize == 0) {
-            mainView.getStatusLabel().setText("");
+            getCurrentStatusLabel().setText("");
         } else {
             String firstItem = listView.getItems().getFirst();
             int index = firstItem.indexOf("(");
             String firstFileName = (index != -1) ? firstItem.substring(0, index).trim() : firstItem;
 
             String statusMsg = (remainingSize == 1) ? firstFileName : firstFileName + "    포함: " + remainingSize;
-            mainView.getStatusLabel().setText(statusMsg);
+            getCurrentStatusLabel().setText(statusMsg);
         }
     }
 
@@ -316,12 +331,17 @@ public class MainController {
     }
 
     private MediaConverter findConverter(MediaFile mediaFile) {
-        if (mediaFile.isImage()) {
-            if (imageConverter == null) imageConverter = new ImageConverter();
-            return imageConverter;
-        } else if (mediaFile.isVideo()) {
-            if (videoConverter == null) videoConverter = new VideoConverter();
-            return videoConverter;
+        if(isGeneralActive) {
+            if (mediaFile.isImage()) {
+                if (imageConverter == null) imageConverter = new ImageConverter();
+                return imageConverter;
+            } else if (mediaFile.isVideo()) {
+                if (videoConverter == null) videoConverter = new VideoConverter();
+                return videoConverter;
+            }
+        }else {
+            if (gifConverter == null) gifConverter = new GifConverter();
+            return gifConverter;
         }
         return null;
     }

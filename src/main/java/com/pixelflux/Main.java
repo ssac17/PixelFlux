@@ -19,12 +19,6 @@ public class Main extends Application {
         primaryStage.setTitle("Pixelflux");
         primaryStage.setScene(scene);
 
-        //프로그램 실행완료시까지 시간 측정
-        primaryStage.setOnShown(event -> {
-            long totalTime = System.currentTimeMillis() - Launcher.START_TIME;
-            System.out.printf("🚀 [PixelFlux] 앱 실행 완료까지 걸린 시간: %d ms (%.2f초)%n",
-                    totalTime, totalTime / 1000.0);
-        });
         primaryStage.show();
     }
 

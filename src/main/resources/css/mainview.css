@@ -168,3 +168,23 @@
     -fx-font-weight: bold;
     -fx-font-size: 14px;
 }
+/* Gif 관련 */
+.tab-bar-container {
+    -fx-background-color: #2b2d30;
+    -fx-background-radius: 8px;
+    -fx-padding: 3px;
+}
+
+.segment-tab-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #9aa0a6;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 7px 16px;
+    -fx-background-radius: 6px;
+}
+
+.segment-tab-active {
+    -fx-background-color: #3574f0;
+    -fx-text-fill: #ffffff;
+}

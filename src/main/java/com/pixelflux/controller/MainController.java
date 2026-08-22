@@ -36,6 +36,12 @@ public class MainController {
     private ImageConverter imageConverter;
     private VideoConverter videoConverter;
 
+    private boolean isGifTabActive = false;
+
+    public boolean isGifTabActive() {
+        return isGifTabActive;
+    }
+
     public MainController(MainView mainView) {
         this.mainView = mainView;
         this.mediaFiles = new ArrayList<>();
@@ -43,6 +49,16 @@ public class MainController {
     }
 
     public void initEventHandlers() {
+        //탭 스위치 이벤트
+        mainView.getTabFormatBtn().setOnAction(e -> {
+            isGifTabActive = false;
+            mainView.switchTab(false);
+        });
+        mainView.getTabGifBtn().setOnAction(e -> {
+            isGifTabActive = true;
+            mainView.switchTab(true);
+        });
+
         setupDeleteKeyEvent();                                                                 //파일 삭제, key이벤트 추가
         DragAndDropAddFiles();                                                                 //드래그 앤 드랍으로 파일 추가
         /* 버튼 클릭 이벤트 연결 */
@@ -53,6 +69,7 @@ public class MainController {
         mainView.getConvertButton().setOnAction(e -> handleConvert());              //파일 변환
         mainView.getExitButton().setOnAction(e -> handleExit());                    //종료
         mainView.getDeleteMenuItem().setOnAction(e -> deleteSelectFile());          //목록에 파일 삭제
+
     }
 
     private void handleSelectFolder() {

@@ -2,6 +2,9 @@ package com.pixelflux.util;
 
 import com.pixelflux.model.ConvertOptions;
 import com.pixelflux.model.MediaFile;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.Frame;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -28,20 +31,19 @@ public class Utils {
     }
 
     public static File generateOutputFile(MediaFile mediaFile, ConvertOptions options) {
-        // 1. 저장할 부모 폴더 결정 (사용자 지정 폴더 or 원본 파일의 부모 폴더)
+        //저장할 부모 폴더 결정 (사용자 지정 폴더 or 원본 파일의 부모 폴더)
         File fileDirectory = mediaFile.file().getParentFile();
         File parentDir = (options.outputDirectory() != null)
                 ? options.outputDirectory()
                 : fileDirectory;
-        
-        
+
         String fileName = mediaFile.name();
         int dotIndex = fileName.lastIndexOf(".");
         String baseName = (dotIndex != -1) ? fileName.substring(0, dotIndex) : fileName;
-        String newExtension = options.targetFormat().toLowerCase();
-        if(mediaFile.isVideo()) {
-            newExtension = "mp4";
-        }
+
+        String targetExt = options.targetFormat().toLowerCase();
+        String newExtension = targetExt.startsWith(".") ? targetExt.substring(1) : targetExt;
+
         String initName = baseName + "_converted." + newExtension;
         File newFile = new File(parentDir, initName);
 
@@ -53,5 +55,14 @@ public class Utils {
             duplicatedCount++;
         }
         return newFile;
+    }
+
+    public static void transferFrames(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder) throws IOException {
+        Frame frame;
+        // 비디오/이미지 프레임 순차 복사
+        while ((frame = grabber.grab()) != null) {
+            recorder.record(frame);
+        }
+        recorder.stop();
     }
 }

@@ -66,15 +66,11 @@ public class VideoConverter implements  MediaConverter {
                 recorder.start();
 
                 //프레임 순회 및 저장
-                Frame frame;
-                while ((frame = grabber.grab()) != null) {
-                    recorder.record(frame);
-                }
-                recorder.stop();
+                Utils.transferFrames(grabber, recorder);
             }
             grabber.stop();
         }catch (Exception e) {
-            System.out.println("동영상 병환 중 에러 발생!, " + mediaFile.file());
+            System.out.println("동영상 변환 중 에러 발생!, " + mediaFile.file());
             e.printStackTrace();
         }
         return outputFile;

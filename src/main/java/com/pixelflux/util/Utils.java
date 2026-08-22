@@ -3,7 +3,7 @@ package com.pixelflux.util;
 import com.pixelflux.model.ConvertOptions;
 import com.pixelflux.model.MediaFile;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
@@ -12,7 +12,9 @@ public class Utils {
     public static void openDirectory(File directory) {
         if(directory == null || !directory.exists() || !directory.isDirectory()) {
             return;
+
         }
+
         if(Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
             if(desktop.isSupported(Desktop.Action.OPEN)) {

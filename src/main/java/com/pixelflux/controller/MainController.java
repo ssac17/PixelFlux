@@ -18,7 +18,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,13 +29,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainController {
 
-    private final List<MediaConverter> converters;
     private final MainView mainView;
     private final List<MediaFile> mediaFiles;
     private File targetDirectory = null;
 
-    public MainController(List<MediaConverter> converters, MainView mainView) {
-        this.converters = converters;
+    private ImageConverter imageConverter;
+    private VideoConverter videoConverter;
+
+    public MainController(MainView mainView) {
         this.mainView = mainView;
         this.mediaFiles = new ArrayList<>();
         initEventHandlers();
@@ -283,12 +283,14 @@ public class MainController {
     }
 
     private MediaConverter findConverter(MediaFile mediaFile) {
-        return converters.stream()
-                .filter(converter ->
-                        (mediaFile.isImage() && converter instanceof ImageConverter) ||
-                        (mediaFile.isVideo() && converter instanceof VideoConverter))
-                .findFirst()
-                .orElse(null);
+        if (mediaFile.isImage()) {
+            if (imageConverter == null) imageConverter = new ImageConverter();
+            return imageConverter;
+        } else if (mediaFile.isVideo()) {
+            if (videoConverter == null) videoConverter = new VideoConverter();
+            return videoConverter;
+        }
+        return null;
     }
 
     private void setButtonsDisable(boolean disable) {

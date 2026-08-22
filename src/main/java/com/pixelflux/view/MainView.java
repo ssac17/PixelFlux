@@ -1,5 +1,6 @@
 package com.pixelflux.view;
 
+import com.pixelflux.Main;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -39,7 +40,7 @@ public class MainView {
         root.setPadding(new Insets(24));
 
         // CSS 파일 로드
-        root.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/mainview.css")).toExternalForm());
+        root.getStylesheets().add(Main.class.getClassLoader().getResource("css/mainview.css").toExternalForm());
 
         // 드래그 앤 드롭 영역
         dropZone = new Label("📥 변환할 파일(이미지/동영상)을 여기에 끌어다 놓으세요\n(또는 클릭하여 Finder에서 파일 선택)");

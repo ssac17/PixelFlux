@@ -66,12 +66,35 @@ public class Utils {
     public static void transferFrames(FFmpegFrameGrabber grabber, FFmpegFrameRecorder recorder) throws IOException {
         Frame frame;
         boolean hasAudio = recorder.getAudioChannels() > 0;
-        // 비디오/이미지 프레임 순차 복사
+
+        double sourceFps = grabber.getFrameRate();
+        double targetFps = recorder.getFrameRate();
+
+        //FPS 비율 계산 (기본값 1.0)
+        double frameInterval = 1.0;
+        if (sourceFps > 0 && targetFps > 0 && targetFps < sourceFps) {
+            frameInterval = sourceFps / targetFps; // 예: 30fps 원본 -> 15fps 대상일 때 2.0
+        }
+
+        double frameCounter = 0.0;
+
         while ((frame = grabber.grab()) != null) {
-            if(!hasAudio && frame.samples != null) {
+            //오디오 프레임 제외 처리
+            if (!hasAudio && frame.samples != null) {
                 continue;
             }
-            recorder.record(frame);
+
+            //비디오/이미지 프레임인 경우 FPS 비율에 따라 스킵
+            if(frame.image != null) {
+                frameCounter += 1.0;
+                if (frameCounter >= frameInterval) {
+                    recorder.record(frame);
+                    frameCounter -= frameInterval;
+                }
+            } else {
+                //기타 프레임(오디오 등)이 활성화되어 있을 때는 그대로 기록
+                recorder.record(frame);
+            }
         }
         recorder.stop();
     }

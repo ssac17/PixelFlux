@@ -57,9 +57,12 @@ public class GifConverter implements MediaConverter {
 
                 // 화질 옵션 반영
                 if (options.quality() >= 1.0) {
-                    recorder.setVideoOption("q:v", "1");
+                    recorder.setVideoOption("sws_flags", "lanczos+accurate_rnd");
+                    recorder.setVideoOption("gifflags", "-offsetting");
                 } else {
-                    recorder.setVideoOption("q:v", "5");
+                    // [일반/경량화 Bayer] 단색 블록 최적화 -> 용량 대폭 감소
+                    recorder.setVideoOption("sws_flags", "bilinear");
+                    recorder.setVideoOption("gifflags", "transdiff"); //프레임 간 차이만 투명 처리하여 용량 절감
                 }
                 recorder.start();
 

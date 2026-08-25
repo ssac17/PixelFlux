@@ -42,7 +42,6 @@ public record ConvertOptions (
             String numOnly = fpsStr.replaceAll("[^0-9]", "");
             if (!numOnly.isEmpty()) {
                 fps = Integer.parseInt(numOnly);
-                System.out.println("fps = " + fps);
             }
         }
 

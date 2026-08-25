@@ -10,6 +10,7 @@ import com.pixelflux.util.Utils;
 import com.pixelflux.view.MainView;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
@@ -24,10 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainController {
@@ -42,6 +40,12 @@ public class MainController {
     private GifConverter gifConverter;
 
     private boolean isGeneralActive = true;
+
+    /* 변환 중 취소 관련 필드 */
+    private ExecutorService currentExecutor;
+    private volatile boolean isCancelled = false;
+    private boolean isConverting = false;
+    private List<CompletableFuture<Boolean>> currentFutures;
 
     public boolean isGeneralActive() {return isGeneralActive;}
     public List<MediaFile> getCurrentMediaFiles() {return isGeneralActive ? generalMediaFiles : gifMediaFiles;}
@@ -73,7 +77,7 @@ public class MainController {
         mainView.getAddFileButton().setOnAction(e -> handleAddFiles());             //파일 추가
         mainView.getDropZone().setOnMouseClicked(e -> handleAddFiles());            //파일 추가
         mainView.getClearListButton().setOnAction(e -> handleClearList());          //파일 목록 지우기
-        mainView.getConvertButton().setOnAction(e -> handleConvert());              //파일 변환
+        mainView.getConvertButton().setOnAction(e -> handleConvertToggle());        //파일 변환 / 취
         mainView.getExitButton().setOnAction(e -> handleExit());                    //종료
         mainView.getDeleteMenuItem().setOnAction(e -> deleteSelectFile());          //목록에 파일 삭제
 
@@ -157,7 +161,8 @@ public class MainController {
         mainView.getProgressLabel().setText("0%");
     }
 
-    private void handleConvert() {
+    private void startConvert() {
+        isCancelled = false;
         List<MediaFile> currentMediaFiles = getCurrentMediaFiles();
         if(currentMediaFiles.isEmpty()) {
             getCurrentStatusLabel().setText("변환할 파일이 없습니다.");
@@ -184,27 +189,31 @@ public class MainController {
 
         progressBar.setProgress(0.0);
         progressLabel.setText("0%");
-        setButtonsDisable(true);
+        setConvertingUI(true);
 
         int fileCount = currentMediaFiles.size();
         int threadCount = Math.min(fileCount, Runtime.getRuntime().availableProcessors());
         AtomicInteger completedCount = new AtomicInteger(0);
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        this.currentExecutor = Executors.newFixedThreadPool(threadCount);
 
         //각 파일별 비동기 변화 파이프라인 생성
-        List<CompletableFuture<Boolean>> futures = currentMediaFiles.stream()
+        this.currentFutures = currentMediaFiles.stream()
                 .map(mediaFile -> CompletableFuture.supplyAsync(() -> {
-                    MediaConverter converter = findConverter(mediaFile);
-                    if(converter == null) {
+                    //취소 시 즉시 종료
+                    if(isCancelled || Thread.currentThread().isInterrupted()) {
                         return false;
                     }
+                    MediaConverter converter = findConverter(mediaFile);
+                    if(converter == null) {return false;}
+
                     try {
                         converter.convert(mediaFile, options);
                         return true;
                     } catch (IOException e) {
                         return false;
                     }
-                }, executor).thenApply(success -> {
+                }, currentExecutor).thenApply(success -> {
                     //개별 파일 변환 완료 때마다 프로그레스 바 갱신
                     int currentCompleted = completedCount.incrementAndGet();
                     double progress = (double) currentCompleted / fileCount;
@@ -218,22 +227,31 @@ public class MainController {
                 })
                 ).toList();
 
-        //모든 파일의 변환이 끝날때 allof 후속 처리
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenAcceptAsync(v -> {
-                    long successCount = futures.stream().filter(CompletableFuture::join).count();
+        //whenCompleteAsync로 정상 완료/취소 일괄 처리
+        CompletableFuture.allOf(currentFutures.toArray(new CompletableFuture[0]))
+                .whenCompleteAsync((v, ex) -> {
+                    setConvertingUI(false);
+
+                    long successCount = currentFutures.stream().filter(f ->
+                            !f.isCancelled() && f.getNow(false)).count();
                     long failCount = fileCount - successCount;
 
-                    setButtonsDisable(false);
-                    getCurrentStatusLabel().setText(String.format("완료 (성공: %d건, 실패: %d건)", successCount, failCount));
-
+                    if(isCancelled) {
+                        mainView.getProgressLabel().setText("중단됨.");
+                        getCurrentStatusLabel().setText(String.format("중단됨 (완료: %d건 / 취소 및 중단: %d건)", successCount, failCount));
+                    }else {
+                        mainView.getProgressLabel().setText("100%");
+                        getCurrentStatusLabel().setText(String.format("완료 (성공: %d건, 실패: %d건)", successCount, failCount));
+                    }
                     //완료시, 저장폴더 열기
                     if(successCount > 0) {
                         File openDir = (targetDirectory != null) ? targetDirectory : currentMediaFiles.getFirst().file().getParentFile();
                         Utils.openDirectory(openDir);
                     }
                     //스레드 풀 정리
-                    executor.shutdown();
+                    if (currentExecutor != null && !currentExecutor.isShutdown()) {
+                        currentExecutor.shutdown();
+                    }
                     //최종 UI 갱신은 Platform::runLater에서 직접 실행
                 }, Platform::runLater);
     }
@@ -350,5 +368,50 @@ public class MainController {
                 mainView.getListView()
         ).forEach(node -> node.setDisable(disable));
         mainView.getDeleteMenuItem().setDisable(disable);
+    }
+
+    private void handleConvertToggle() {
+        if(isConverting) {
+            handleCancel();
+        }else {
+            startConvert();
+        }
+    }
+
+    private void handleCancel() {
+        if(currentExecutor != null && !currentExecutor.isShutdown()) {
+            isCancelled = true;
+            mainView.getProgressLabel().setText("변환을 중단하는 중입니다...");
+            if (currentFutures != null) {
+                currentFutures.forEach(future -> future.cancel(true));
+            }
+            //즉시 중단
+            currentExecutor.shutdownNow();
+        }
+    }
+
+    private void setConvertingUI(boolean converting) {
+        this.isConverting = converting;
+
+        setButtonsDisable(converting);
+
+        Button convertBtn = mainView.getConvertButton();
+        convertBtn.setDisable(false); // 버튼은 항상 클릭 가능해야 함
+
+        if (converting) {
+            convertBtn.setText("⏹️ 변환 중단");
+            convertBtn.getStyleClass().remove("btn-primary");
+            if (!convertBtn.getStyleClass().contains("btn-converting-cancel")) {
+                convertBtn.getStyleClass().add("btn-converting-cancel");
+            }
+            convertBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold;");
+        } else {
+            convertBtn.setText("🎨 변환 시작");
+            convertBtn.getStyleClass().remove("btn-converting-cancel");
+            if (!convertBtn.getStyleClass().contains("btn-primary")) {
+                convertBtn.getStyleClass().add("btn-primary");
+            }
+            convertBtn.setStyle("");
+        }
     }
 }

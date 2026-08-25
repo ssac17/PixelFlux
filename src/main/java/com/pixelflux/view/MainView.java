@@ -10,7 +10,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 // 레이아웃 구성
 public class MainView {
@@ -49,7 +52,6 @@ public class MainView {
     private ListView<String> gifListView;
     private VBox formatViewRoot;
     private VBox gifViewRoot;
-
     //옵션창 길
     private final int LABEL_WIDTH = 42;
 

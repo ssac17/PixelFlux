@@ -188,3 +188,22 @@
     -fx-background-color: #3574f0;
     -fx-text-fill: #ffffff;
 }
+
+/* 변환 중단 버튼 */
+.btn-converting-cancel {
+    -fx-background-color: #dc2626 !important;
+    -fx-text-fill: white !important;
+    -fx-font-weight: bold !important;
+    -fx-font-size: 14px !important;
+    -fx-background-radius: 8px !important;
+    -fx-cursor: hand !important;
+    -fx-effect: dropshadow(three-pass-box, rgba(220, 38, 38, 0.4), 8, 0, 0, 2);
+}
+
+.btn-converting-cancel:hover {
+    -fx-background-color: #b91c1c !important;
+}
+
+.btn-converting-cancel:pressed {
+    -fx-background-color: #991b1b !important;
+}

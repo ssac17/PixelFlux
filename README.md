@@ -5,10 +5,7 @@
 > 드래그 앤 드롭으로 대량의 미디어 파일을 병렬 처리하여 빠르게 변환합니다.
 > 포맷 변환, 해상도 조절, 품질 최적화 기능을 지원합니다.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Java 21](https://img.shields.io/badge/Java-21-red)](https://www.oracle.com/java/technologies/javase/jdk21-archive.html)
-[![JavaFX 21](https://img.shields.io/badge/JavaFX-21-blue)](https://gluonhq.com/products/javafx/)
-[![Gradle 8.x](https://img.shields.io/badge/Gradle-8.x-purple)](https://gradle.org/)
+<small>mac환경에서 실습하여 실제 프로그램은 올리지 못했습니다. 후추 window용으로 올리겠습니다.</small>
 
 ---
 
@@ -385,14 +382,11 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
 ## 📹 주요 기능 데모
 
-아래 섹션에 실제 사용 화면의 GIF를 추가하세요. 각 GIF 파일을 `assets/demos/` 폴더에 저장하면 마크다운에서 자동으로 표시됩니다.
-
 ### 🎬 파일 추가 및 변환 (드래그 앤 드롭)
 
 **설명**: 파일을 애플리케이션 창으로 드래그하여 파일 목록에 추가하고, 변환 옵션을 설정한 후 변환을 시작합니다.
 
 ```markdown
-GIF 파일 추가:
 ![Drag and Drop Demo](assets/demos/drag-and-drop-demo.gif)
 ```
 
@@ -466,71 +460,6 @@ GIF 파일 추가:
 ```markdown
 ![Folder Auto Open Demo](assets/demos/folder-auto-open-demo.gif)
 ```
-
----
-
-### 📋 GIF 추가 방법
-
-#### 1단계: 화면 녹화
-- **macOS**: ScreenFlow, Recordia, Kap 사용
-- **Windows**: ScreenFlow, ShareX, Camtasia 사용
-- **GIF 변환**: FFmpeg, GIF Brewery, ezgif.com 사용
-
-#### 2단계: 저장
-- `assets/demos/` 폴더에 GIF 파일 저장
-- 파일명: `{기능}-demo.gif` 형식 (예: `image-conversion-demo.gif`)
-
-#### 3단계: 마크다운에 삽입
-```markdown
-![기능 설명](assets/demos/파일명.gif)
-```
-
-#### 4단계: 커밋 및 푸시
-```bash
-git add assets/demos/
-git commit -m "Add demo GIFs for portfolio"
-git push origin main
-```
-
----
-
-### 📂 프로젝트 구조 예시
-
-```
-PixelFlux/
-├── assets/
-│   └── demos/
-│       ├── drag-and-drop-demo.gif          # 파일 추가 (~5초)
-│       ├── image-conversion-demo.gif       # 이미지 변환 (~10초)
-│       ├── video-conversion-demo.gif       # 동영상 변환 (15~20초)
-│       ├── batch-processing-demo.gif       # 배치 처리 (15~20초)
-│       ├── quality-adjustment-demo.gif     # 품질 조절 (10초)
-│       └── folder-auto-open-demo.gif       # 폴더 열기 (5초)
-└── README.md
-```
-
----
-
-### 💡 GIF 제작 팁
-
-| 항목 | 권장 사항 |
-|------|----------|
-| **해상도** | 1280×720 (Full HD 절반) |
-| **프레임율** | 20-30 FPS |
-| **파일 크기** | 2-5MB (GitHub에 최적) |
-| **길이** | 5-20초 (간결한 데모) |
-| **배경** | 깨끗한 바탕 (산만하지 않게) |
-
----
-
-### ✨ 포트폴리오 개선 효과
-
-GIF 데모를 추가하면:
-- ✅ **시각적 임팩트**: 프로젝트의 기능을 한눈에 이해
-- ✅ **신뢰성**: 실제 동작하는 프로그램임을 증명
-- ✅ **사용자 경험 설명**: UI/UX의 직관성을 보여줌
-- ✅ **채용 담당자 인상**: 프로젝트에 대한 사려깊은 준비 표현
-- ✅ **GitHub Stars**: 멋진 README는 더 많은 관심 유도
 
 ---
 

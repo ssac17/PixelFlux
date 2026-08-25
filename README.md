@@ -387,6 +387,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 **설명**: 파일을 애플리케이션 창으로 드래그하여 파일 목록에 추가하고, 변환 옵션을 설정한 후 변환을 시작합니다.
 
 ```markdown
+
 ![Drag and Drop Demo](https://github.com/ssac17/PixelFlux/blob/main/assets/demos/drag-and-drop-demo.gif)
 
 ---

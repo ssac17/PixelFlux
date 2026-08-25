@@ -18,8 +18,6 @@ public class Main extends Application {
         Parent root = mainView.createContent();
         new MainController(mainView);
 
-
-
         //창 크기
         Scene scene = new Scene(root, 800, 700);
         KeyCombination closeShortcut = new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN);

@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -176,7 +177,6 @@ public class MainController {
             options = ConvertOptions.ofGif(fps, width, quality, targetDirectory);
         }
 
-
         //프로그레스 바 추가
         mainView.getProgressContainer().setVisible(true);
         ProgressBar progressBar = mainView.getProgressBar();
@@ -185,33 +185,27 @@ public class MainController {
         progressBar.setProgress(0.0);
         progressLabel.setText("0%");
         setButtonsDisable(true);
+
         int fileCount = currentMediaFiles.size();
+        int threadCount = Math.min(fileCount, Runtime.getRuntime().availableProcessors());
+        AtomicInteger completedCount = new AtomicInteger(0);
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
-        //변환 병렬 처리
-        new Thread(() -> {
-            //스레드 수 지정
-            int threadCount = Math.min(fileCount, Runtime.getRuntime().availableProcessors());
-            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-
-            AtomicInteger successCount = new AtomicInteger(0);
-            AtomicInteger failCount = new AtomicInteger(0);
-            AtomicInteger completedCount = new AtomicInteger(0); // 💡 프로그레스 바 계산용
-
-            for (MediaFile mediaFile : currentMediaFiles) {
-                executor.submit(() -> {
+        //각 파일별 비동기 변화 파이프라인 생성
+        List<CompletableFuture<Boolean>> futures = currentMediaFiles.stream()
+                .map(mediaFile -> CompletableFuture.supplyAsync(() -> {
                     MediaConverter converter = findConverter(mediaFile);
-                    if (converter == null) {
-                        failCount.incrementAndGet();
-                    } else {
-                        try {
-                            converter.convert(mediaFile, options);
-                            successCount.incrementAndGet();
-                        } catch (IOException e) {
-                            failCount.incrementAndGet();
-                        }
+                    if(converter == null) {
+                        return false;
                     }
-
-                    //완료된 총 개수로 진행률 계산
+                    try {
+                        converter.convert(mediaFile, options);
+                        return true;
+                    } catch (IOException e) {
+                        return false;
+                    }
+                }, executor).thenApply(success -> {
+                    //개별 파일 변환 완료 때마다 프로그레스 바 갱신
                     int currentCompleted = completedCount.incrementAndGet();
                     double progress = (double) currentCompleted / fileCount;
                     int percent = (int) Math.round(progress * 100);
@@ -220,31 +214,28 @@ public class MainController {
                         progressBar.setProgress(progress);
                         progressLabel.setText(percent + "%");
                     });
-                });
-            }
+                    return success;
+                })
+                ).toList();
 
-            //모든 스레드가 끝날 때까지 대기
-            executor.shutdown();
-            try {
-                executor.awaitTermination(1, TimeUnit.HOURS);
-            } catch (InterruptedException e) {
-                executor.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
+        //모든 파일의 변환이 끝날때 allof 후속 처리
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenAcceptAsync(v -> {
+                    long successCount = futures.stream().filter(CompletableFuture::join).count();
+                    long failCount = fileCount - successCount;
 
-            int finalSuccess = successCount.get();
-            int finalFail = failCount.get();
-            Platform.runLater(() -> {
-                setButtonsDisable(false);
-                getCurrentStatusLabel().setText(
-                        String.format("완료 (성공: %d건, 실패: %d건)", finalSuccess, finalFail)
-                );
-                if (finalSuccess > 0) {
-                    File openDir = (targetDirectory != null) ? targetDirectory : currentMediaFiles.getFirst().file().getParentFile();
-                    Utils.openDirectory(openDir);
-                }
-            });
-        }).start();
+                    setButtonsDisable(false);
+                    getCurrentStatusLabel().setText(String.format("완료 (성공: %d건, 실패: %d건)", successCount, failCount));
+
+                    //완료시, 저장폴더 열기
+                    if(successCount > 0) {
+                        File openDir = (targetDirectory != null) ? targetDirectory : currentMediaFiles.getFirst().file().getParentFile();
+                        Utils.openDirectory(openDir);
+                    }
+                    //스레드 풀 정리
+                    executor.shutdown();
+                    //최종 UI 갱신은 Platform::runLater에서 직접 실행
+                }, Platform::runLater);
     }
 
     private void setupDeleteKeyEvent() {

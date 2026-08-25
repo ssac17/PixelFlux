@@ -387,7 +387,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 **설명**: 파일을 애플리케이션 창으로 드래그하여 파일 목록에 추가하고, 변환 옵션을 설정한 후 변환을 시작합니다.
 
 ```markdown
-![Drag and Drop Demo](assets/demos/drag-and-drop-demo.gif)
+![Drag and Drop Demo](https://raw.githubusercontent.com/ssac17/PixelFlux/main/assets/demos/drag-and-drop-demo.gif)
 ```
 
 ---
@@ -397,7 +397,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 **설명**: PNG/BMP 이미지를 JPG/WebP로 변환하고 리사이징합니다.
 
 ```markdown
-![Image Conversion Demo](assets/demos/image-conversion-demo.gif)
+![Image Conversion Demo](https://raw.githubusercontent.com/ssac17/PixelFlux/main/assets/demos/image-conversion-demo.gif)
 ```
 
 **주요 기능**:
@@ -412,7 +412,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 **설명**: MOV/AVI 동영상을 MP4로 변환하고 해상도를 조절합니다.
 
 ```markdown
-![Video Conversion Demo](assets/demos/video-conversion-demo.gif)
+![Video Conversion Demo](https://raw.githubusercontent.com/ssac17/PixelFlux/main/assets/demos/video-conversion-demo.gif)
 ```
 
 **주요 기능**:
@@ -428,7 +428,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 **설명**: 여러 파일을 동시에 변환합니다. 병렬 처리로 빠른 속도를 달성합니다.
 
 ```markdown
-![Batch Processing Demo](assets/demos/batch-processing-demo.gif)
+![Batch Processing Demo](https://raw.githubusercontent.com/ssac17/PixelFlux/main/assets/demos/batch-processing-demo.gif)
 ```
 
 **주요 기능**:
@@ -443,7 +443,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 **설명**: 이미지/동영상의 품질을 조절하여 파일 크기를 최적화합니다.
 
 ```markdown
-![Quality Adjustment Demo](assets/demos/quality-adjustment-demo.gif)
+![Quality Adjustment Demo](https://raw.githubusercontent.com/ssac17/PixelFlux/main/assets/demos/quality-adjustment-demo.gif)
 ```
 
 **품질 옵션**:
@@ -458,7 +458,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 **설명**: 변환 작업이 완료되면 결과 폴더가 자동으로 열립니다.
 
 ```markdown
-![Folder Auto Open Demo](assets/demos/folder-auto-open-demo.gif)
+![Folder Auto Open Demo](https://raw.githubusercontent.com/ssac17/PixelFlux/main/assets/demos/folder-auto-open-demo.gif)
 ```
 
 ---

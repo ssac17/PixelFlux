@@ -386,9 +386,7 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
 **설명**: 파일을 애플리케이션 창으로 드래그하여 파일 목록에 추가하고, 변환 옵션을 설정한 후 변환을 시작합니다.
 
-```markdown
 <img width="720" height="434" alt="드래그앤드랍_converted" src="https://github.com/user-attachments/assets/b2b7cac2-b2cf-46af-95dd-a70101a9672a" />
-```
 
 ---
 
@@ -396,9 +394,9 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
 **설명**: PNG/BMP 이미지를 JPG/WebP로 변환하고 리사이징합니다.
 
-```markdown
+
 <img width="720" height="450" alt="이미지_변환_converted" src="https://github.com/user-attachments/assets/0320c0bf-ece7-4a27-bca4-65d397b35915" />
-```
+
 
 **주요 기능**:
 - PNG → JPG/WebP 포맷 변환
@@ -411,9 +409,9 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
 **설명**: MOV/AVI 동영상을 MP4로 변환하고 해상도를 조절합니다.
 
-```markdown
+
 <img width="720" height="440" alt="영상_변환_converted" src="https://github.com/user-attachments/assets/47c16fa4-028c-4972-8b59-4f35f953cc1a" />
-```
+
 
 **주요 기능**:
 - MOV → MP4 포맷 변환
@@ -427,9 +425,9 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
 **설명**: 여러 파일을 동시에 변환합니다. 병렬 처리로 빠른 속도를 달성합니다.
 
-```markdown
+
 <img width="720" height="450" alt="다중처리_converted" src="https://github.com/user-attachments/assets/c75bd2ff-5634-4814-af0b-6c4103e342f0" />
-```
+
 
 **주요 기능**:
 - 50개 이상 파일 동시 처리
@@ -442,9 +440,8 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
 **설명**: 이미지/동영상의 품질을 조절하여 파일 크기를 최적화합니다.
 
-```markdown
 <img width="720" height="448" alt="사이즈조절_converted" src="https://github.com/user-attachments/assets/c1a44a5e-f7f6-449d-a2c6-6eefa13801fa" />
-```
+
 
 **품질 옵션**:
 - **60%**: 가장 작은 파일 크기 (낮은 품질)
@@ -457,9 +454,8 @@ MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
 **설명**: 변환 작업이 완료되면 결과 폴더가 자동으로 열립니다.
 
-```markdown
 <img width="720" height="414" alt="폴더열기_converted" src="https://github.com/user-attachments/assets/96c1e4fd-e21f-47b9-8984-fd34102a7feb" />
-```
+
 
 ---
 
